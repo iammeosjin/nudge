@@ -1,0 +1,14 @@
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+deno.lock
+
+# Fresh build directory
+_fresh/
+# npm dependencies
+node_modules/
+db/*
+!db/.gitkeep
