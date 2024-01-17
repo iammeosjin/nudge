@@ -1,6 +1,6 @@
 {
 	"tasks": {
-		"start": "deno run -A --unstable main.ts",
+		"start": "env $(cat .env) deno run -A --unstable main.ts",
 		"build": "deno run -A --unstable mod.ts build",
 		"check": "deno fmt --check && deno lint && deno check **/*.ts "
 	},

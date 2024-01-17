@@ -1,7 +1,5 @@
 // @deno-types=npm:@types/jira-client
 import JiraApi from 'npm:jira-client';
-import { config } from 'https://deno.land/x/dotenv/mod.ts';
-await config({ export: true });
 
 const jiraClient = new JiraApi({
 	protocol: 'https',
