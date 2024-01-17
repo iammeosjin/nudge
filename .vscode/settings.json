@@ -15,5 +15,8 @@
 	},
 	"[javascript]": {
 		"editor.defaultFormatter": "denoland.vscode-deno"
+	},
+	"yaml.schemas": {
+		"https://json.schemastore.org/github-workflow.json": "file:///home/meosjin/projects/nudge/.github/workflows/deploy.yml"
 	}
 }
