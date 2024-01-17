@@ -2,13 +2,12 @@
 import pick from 'https://deno.land/x/ramda@v0.27.2/source/pick.js';
 import jiraClient from '../libs/jira-client.ts';
 import {
+	Issue,
 	JiraChangeLogResponse,
 	JiraIssueFieldsResponse,
 	JiraIssueType,
 	JiraRequestOptions,
 	JiraStatus,
-	JiraTask,
-	NudgeCriteria,
 } from '../types/task.ts';
 
 const issueTypes = {
@@ -32,7 +31,7 @@ export class JiraAPI {
 		options?: Partial<JiraRequestOptions>,
 	): Promise<
 		JiraRequestOptions & {
-			issues: JiraTask[];
+			issues: Issue[];
 		}
 	> {
 		const query = [
@@ -53,6 +52,7 @@ export class JiraAPI {
 					'parent',
 					'issuetype',
 					'assignee',
+					'reporter',
 					'statuscategorychangedate',
 					'created',
 					'updated',
@@ -68,7 +68,7 @@ export class JiraAPI {
 			}[];
 		};
 
-		const issues: JiraTask[] = result.issues
+		const issues: Issue[] = result.issues
 			.map((issue) => {
 				let parent: JiraTask['parent'] | undefined;
 				const parentId = issue.fields.parent?.fields.issuetype.id;
@@ -80,50 +80,27 @@ export class JiraAPI {
 						type: issueTypes[parentId],
 					};
 				}
-				// const movedToInProgress = issue.changelog.histories.find(
-				// 	(history) =>
-				// 		history.items.some((item) =>
-				// 			item.field === 'status' &&
-				// 			item.toString === 'In Progress'
-				// 		),
-				// )?.created as string;
 
-				const acceptanceTestingCard = (issue.fields?.subtasks || [])
-					.find((task) =>
-						(task.fields.summary || '').match(
-							/\bAcceptance Testing\b/,
-						)
-					);
-
-				const inProgressDevCards = (issue.fields?.subtasks || []).find((
-					task,
-				) => !(task.fields.summary || '').match(
-					/\bAcceptance Testing\b/,
-				) && task.fields.status.name !== 'Done' &&
-					task.fields.status.name !== 'Canceled'
-				);
-
-				let criteria: NudgeCriteria = {
-					cardStatus: issue.fields.status.name as JiraStatus,
-					hasATCard: !!acceptanceTestingCard,
-					aTCardStatus: acceptanceTestingCard?.fields.status
-						.name as JiraStatus,
-					devCardsDone: !inProgressDevCards,
-				};
+				const subTasks = (issue.fields?.subtasks || []).map((task) => {
+					return {
+						key: task.key,
+						summary: task.fields.summary,
+						status: task.fields?.status?.name as JiraStatus,
+						type: issueTypes[task.fields?.issuetype?.id],
+					};
+				});
 
 				return {
 					key: issue.key,
+					summary: issue.fields.summary,
 					assignee: issue.fields?.assignee?.accountId,
-					assigneeName: issue.fields?.assignee?.displayName,
-					hasSubtask: (issue.fields?.subtasks || []).length > 0,
+					reporter: issue.fields?.reporter?.accountId,
+					status: issue.fields?.status?.name as JiraStatus,
 					type: issueTypes[
 						issue.fields?.issuetype?.id
 					],
 					parent,
-					created: issue.fields?.created,
-					updated: issue.fields?.updated,
-					status: issue.fields?.status?.name as JiraStatus,
-					criteria,
+					subTasks,
 				};
 			});
 

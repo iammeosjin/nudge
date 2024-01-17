@@ -28,26 +28,25 @@ export type NudgeCriteria = {
 	devCardsDone: boolean;
 };
 
-export type JiraTask = {
+export interface Issue {
 	key: string;
+	summary: string;
 	assignee: string;
-	hasSubtask: boolean;
-	type: JiraIssueType;
-	created: string;
-	updated: string;
+	reporter: string;
 	status: JiraStatus;
-	parent?: Pick<JiraTask, 'key' | 'type' | 'status'>;
-	assigneeName: string;
-	criteria: NudgeCriteria;
-};
+	type: JiraIssueType;
+	parent?: Pick<Issue, 'key' | 'type' | 'status'>;
+	subTasks: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
+}
 
 export type JiraIssueFieldsResponse = {
-	summary?: string;
+	summary: string;
 	issuetype: { id: string };
 	status: { name: string };
 	subtasks?: { key: string; fields: JiraIssueFieldsResponse }[];
 	parent?: { key: string; fields: JiraIssueFieldsResponse };
 	assignee: { accountId: string; displayName: string };
+	reporter: { accountId: string; displayName: string };
 	statuscategorychangedate: string;
 	updated: string;
 	created: string;
