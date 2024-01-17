@@ -15,11 +15,5 @@
 	},
 	"[javascript]": {
 		"editor.defaultFormatter": "denoland.vscode-deno"
-	},
-	"css.customData": [
-		".vscode/tailwind.json"
-	],
-	"yaml.schemas": {
-		"https://json.schemastore.org/github-workflow.json": "file:///home/meosjin/projects/deno-projects/team-metrics/.github/workflows/deploy.yml"
 	}
 }

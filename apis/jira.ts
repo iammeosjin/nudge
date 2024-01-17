@@ -1,4 +1,3 @@
-// @deno-types=npm:@types/luxon
 import pick from 'https://deno.land/x/ramda@v0.27.2/source/pick.js';
 import jiraClient from '../libs/jira-client.ts';
 import {
@@ -70,7 +69,7 @@ export class JiraAPI {
 
 		const issues: Issue[] = result.issues
 			.map((issue) => {
-				let parent: JiraTask['parent'] | undefined;
+				let parent: Issue['parent'] | undefined;
 				const parentId = issue.fields.parent?.fields.issuetype.id;
 				if (parentId) {
 					parent = {
