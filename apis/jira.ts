@@ -1,15 +1,13 @@
 // @deno-types=npm:@types/luxon
-import { DateTime } from 'npm:luxon';
 import pick from 'https://deno.land/x/ramda@v0.27.2/source/pick.js';
 import jiraClient from '../libs/jira-client.ts';
-import { TIMEZONE } from '../libs/constants.ts';
 import {
+	Issue,
 	JiraChangeLogResponse,
 	JiraIssueFieldsResponse,
 	JiraIssueType,
 	JiraRequestOptions,
 	JiraStatus,
-	JiraTask,
 } from '../types/task.ts';
 
 const issueTypes = {
@@ -30,27 +28,19 @@ const issueTypes = {
 
 export class JiraAPI {
 	static async getIssues(
-		filter?: Partial<{ type: string; cursor: string }>,
 		options?: Partial<JiraRequestOptions>,
 	): Promise<
 		JiraRequestOptions & {
-			issues: JiraTask[];
+			issues: Issue[];
 		}
 	> {
-		const cursor =
-			(filter?.cursor ? DateTime.fromISO(filter.cursor) : DateTime.now())
-				.setZone(TIMEZONE);
 		const query = [
 			'project = "ROW"',
-			`(created >= "${cursor.toFormat('yyyy-MM-dd')}" OR resolved >= "${
-				cursor.toFormat('yyyy-MM-dd')
-			}")`,
+			`status = "In Progress" and type in (Bug, Story, standardIssueTypes())`,
 		].filter((index) => !!index).join(' AND ');
 
 		const jql =
 			`${query} ORDER BY created DESC, resolved DESC, status DESC, updated DESC`;
-
-		console.log(jql);
 
 		const result = await jiraClient.searchJira(
 			jql,
@@ -62,6 +52,7 @@ export class JiraAPI {
 					'parent',
 					'issuetype',
 					'assignee',
+					'reporter',
 					'statuscategorychangedate',
 					'created',
 					'updated',
@@ -77,7 +68,7 @@ export class JiraAPI {
 			}[];
 		};
 
-		const issues: JiraTask[] = result.issues
+		const issues: Issue[] = result.issues
 			.map((issue) => {
 				let parent: JiraTask['parent'] | undefined;
 				const parentId = issue.fields.parent?.fields.issuetype.id;
@@ -89,37 +80,27 @@ export class JiraAPI {
 						type: issueTypes[parentId],
 					};
 				}
-				const movedToInProgress = issue.changelog.histories.find(
-					(history) =>
-						history.items.some((item) =>
-							item.field === 'status' &&
-							item.toString === 'In Progress'
-						),
-				)?.created as string;
 
 				const subTasks = (issue.fields?.subtasks || []).map((task) => {
 					return {
 						key: task.key,
+						summary: task.fields.summary,
 						status: task.fields?.status?.name as JiraStatus,
 						type: issueTypes[task.fields?.issuetype?.id],
 					};
 				});
+
 				return {
 					key: issue.key,
+					summary: issue.fields.summary,
 					assignee: issue.fields?.assignee?.accountId,
-					assigneeName: issue.fields?.assignee?.displayName,
-					parent,
-					hasSubtask: subTasks.length > 0,
-					subTasks,
+					reporter: issue.fields?.reporter?.accountId,
+					status: issue.fields?.status?.name as JiraStatus,
 					type: issueTypes[
 						issue.fields?.issuetype?.id
 					],
-					created: issue.fields?.created,
-					updated: issue.fields?.updated,
-					statusCategoryChangeDate: issue.fields
-						?.statuscategorychangedate,
-					movedToInProgress: movedToInProgress,
-					status: issue.fields?.status?.name as JiraStatus,
+					parent,
+					subTasks,
 				};
 			});
 

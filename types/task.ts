@@ -1,5 +1,3 @@
-
-
 export enum JiraIssueType {
 	EPIC = 'EPIC',
 	BUG = 'BUG',
@@ -23,27 +21,32 @@ export enum JiraStatus {
 	READY_FOR_RELEASE = 'Ready for Release',
 }
 
-export type JiraTask = {
-	key: string;
-	assignee: string;
-	hasSubtask: boolean;
-	type: JiraIssueType;
-	created: string;
-	updated: string;
-	statusCategoryChangeDate: string;
-	movedToInProgress: string;
-	status: JiraStatus;
-	parent?: Pick<JiraTask, 'key' | 'type' | 'status'>;
-	assigneeName: string;
-	subTasks: Pick<JiraTask, 'key' | 'type' | 'status'>[];
+export type NudgeCriteria = {
+	hasATCard: boolean;
+	aTCardStatus: JiraStatus;
+	cardStatus: JiraStatus;
+	devCardsDone: boolean;
 };
 
+export interface Issue {
+	key: string;
+	summary: string;
+	assignee: string;
+	reporter: string;
+	status: JiraStatus;
+	type: JiraIssueType;
+	parent?: Pick<Issue, 'key' | 'type' | 'status'>;
+	subTasks: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
+}
+
 export type JiraIssueFieldsResponse = {
+	summary: string;
 	issuetype: { id: string };
 	status: { name: string };
 	subtasks?: { key: string; fields: JiraIssueFieldsResponse }[];
 	parent?: { key: string; fields: JiraIssueFieldsResponse };
 	assignee: { accountId: string; displayName: string };
+	reporter: { accountId: string; displayName: string };
 	statuscategorychangedate: string;
 	updated: string;
 	created: string;
