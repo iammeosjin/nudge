@@ -1,68 +1,33 @@
+import { JiraAPI } from '../apis/jira.ts';
+// @deno-types=npm:@types/bluebird
+import Bluebird from 'npm:bluebird';
 import { Issue, JiraRequestOptions } from '../types/task.ts';
 
+type ProcessedResult = {
+	triggers: Issue[];
+};
+
 export default async function jiraIssuesConsumer<T>(
-	jiraCallBack: (options?: Partial<JiraRequestOptions>) => Promise<
-		JiraRequestOptions & {
-			issues: Issue[];
-		}
-	>,
-	handler: (doc: Issue | Issue[]) => Promise<void>,
-	batchSize = 1,
+	result: ProcessedResult,
+	options?: Partial<JiraRequestOptions>,
 ) {
-	let processor = (doc?: Issue) => {
-		if (!doc) {
-			return undefined;
-		}
+	const response = await JiraAPI.getIssues(options);
 
-		return handler(doc);
-	};
+	await Bluebird.reduce(response.issues, (acc, issue) => {
+		/*
+     if ( all subtasks are done but the acceptance testing card still in "backlog" status ) {
+			 acc.push(issue)
+		 } else if ...
+	 */
+		return acc;
+	}, result.triggers);
 
-	if (batchSize > 1) {
-		processor = (() => {
-			let buffer: Issue[] = [];
-
-			return async (doc?: Issue) => {
-				if (!doc) {
-					if (!buffer.length) {
-						return;
-					}
-
-					await handler(buffer);
-					buffer = [];
-					return;
-				}
-
-				buffer.push(doc);
-
-				if (buffer.length >= batchSize) {
-					await handler(buffer);
-					buffer = [];
-				}
-			};
-		})();
+	if ((response.startAt + response.maxResults) < response.total) {
+		return jiraIssuesConsumer(result, {
+			...options,
+			startAt: response.startAt + response.maxResults,
+		});
 	}
 
-	const processIssues = async (issues: Issue[]) => {
-		for (const issue of issues) {
-			await processor(issue);
-		}
-	};
-
-	const jiraResponse = await jiraCallBack();
-
-	const { startAt, maxResults, total } = jiraResponse;
-
-	let currentPage = startAt + maxResults;
-
-	processIssues(jiraResponse.issues);
-
-	while (currentPage < total) {
-		const nextPageResponse = await jiraCallBack({ startAt: currentPage });
-		if (nextPageResponse) {
-			processIssues(nextPageResponse.issues);
-			currentPage += nextPageResponse.maxResults;
-		}
-	}
-
-	await processor();
+	return result;
 }
