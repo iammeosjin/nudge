@@ -42,14 +42,7 @@ export default async function consumeJiraIssues(
 	result.triggers = await Bluebird.reduce(
 		response.issues,
 		(acc: Trigger[], issue: Issue) => {
-			const {
-				atCards,
-				devCards,
-				cardStatuses,
-				allDevCardsDone,
-				atCardStatuses,
-				allAtCardsDone,
-			} = (issue.subTasks || []).reduce(
+			const breakdown = (issue.subTasks || []).reduce(
 				(accum, curr) => {
 					if (
 						(curr.summary || '').toLowerCase().includes(
@@ -84,25 +77,29 @@ export default async function consumeJiraIssues(
 				} as SubTaskBreakdwon,
 			);
 
+			const {
+				atCards,
+				devCards,
+				cardStatuses,
+				atCardStatuses,
+			} = breakdown;
+
+			const allDevCardsDone = !isEmpty(devCards) &&
+				breakdown.allDevCardsDone;
+
+			const allAtCardsDone = !isEmpty(atCards) &&
+				breakdown.allAtCardsDone;
+
 			const trigger = {
 				link: `https://identifi.atlassian.net/browse/${issue.key}`,
 				key: issue.key,
 				recipient: issue.assignee,
 			};
 
-			if (issue.status === JiraStatus.READY) {
-				if (
-					cardStatuses.includes(JiraStatus.IN_PROGRESS) ||
-					cardStatuses.includes(JiraStatus.DONE)
-				) {
-					console.log('T5');
-					acc.push({
-						type: TriggerType.T5,
-						body: trigger,
-					});
-					return acc;
-				}
-			} else if (issue.status === JiraStatus.BACKLOG) {
+			if (
+				issue.status === JiraStatus.READY ||
+				issue.status === JiraStatus.BACKLOG
+			) {
 				if (
 					cardStatuses.includes(JiraStatus.IN_PROGRESS) ||
 					cardStatuses.includes(JiraStatus.READY)
@@ -117,7 +114,7 @@ export default async function consumeJiraIssues(
 			}
 
 			if (
-				!isEmpty(devCards) && allDevCardsDone &&
+				allDevCardsDone &&
 				!isEmpty(atCards) && atCardStatuses.includes(JiraStatus.BACKLOG)
 			) {
 				console.log('T1');
@@ -126,13 +123,23 @@ export default async function consumeJiraIssues(
 					body: trigger,
 				});
 			} else if (
-				!isEmpty(devCards) && allDevCardsDone &&
-				!isEmpty(atCards) && allAtCardsDone &&
+				allDevCardsDone &&
+				allAtCardsDone &&
 				issue.status === JiraStatus.IN_PROGRESS
 			) {
 				console.log('T2');
 				acc.push({
 					type: TriggerType.T2,
+					body: trigger,
+				});
+			} else if (
+				!isEmpty(devCards) && !allDevCardsDone &&
+				(atCardStatuses.includes(JiraStatus.IN_PROGRESS) ||
+					atCardStatuses.includes(JiraStatus.READY))
+			) {
+				console.log('T6');
+				acc.push({
+					type: TriggerType.T6,
 					body: trigger,
 				});
 			}

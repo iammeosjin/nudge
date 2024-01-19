@@ -23,7 +23,10 @@ export default async function consumeGithubPullRequests(
 	result: ProcessedResult,
 	options: GithubRequestOptions,
 ) {
-	const response = await GithubAPI.getPullRequests(options);
+	const response = await GithubAPI.getPullRequests({
+		...options,
+		first: options?.first || 100,
+	});
 
 	result.triggers = await Bluebird.reduce(
 		response.pullRequests,
