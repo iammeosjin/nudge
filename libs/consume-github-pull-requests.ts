@@ -1,7 +1,10 @@
+// @deno-types=npm:@types/luxon
+import { DateTime } from 'npm:luxon';
 // @deno-types=npm:@types/bluebird
 import Bluebird from 'npm:bluebird';
 import { PullRequest } from '../types/pull-request.ts';
 import { GithubAPI, GithubRequestOptions } from '../apis/github.ts';
+import { TIMEZONE } from './constants.ts';
 
 type ProcessedResult = {
 	triggers: PullRequest[];
@@ -24,8 +27,20 @@ export default async function consumeGithubPullRequests(
 
 	result.triggers = await Bluebird.reduce(
 		response.pullRequests,
-		(acc: PullRequest[], issue: PullRequest) => {
-			if (issue.merged) return acc;
+		(acc: PullRequest[], pr: PullRequest) => {
+			if (pr.merged) return acc;
+
+			if (
+				Math.floor(
+					Math.abs(
+						DateTime.fromISO(pr.updatedAt, { zone: TIMEZONE })
+							.diffNow('minutes').minutes,
+					),
+				) > 5
+			) {
+				console.log('A3', pr);
+				acc.push(pr);
+			}
 
 			return acc;
 		},
