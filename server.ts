@@ -1,3 +1,7 @@
 import '$std/dotenv/load.ts';
 
-Deno.serve(() => new Response('Hello, world!'));
+const users = await Deno.readTextFile('./db/users.json').then((content) =>
+	JSON.parse(content)
+);
+
+Deno.serve(() => new Response(JSON.stringify(users, null, 2)));

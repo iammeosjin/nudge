@@ -10,5 +10,5 @@ deno.lock
 _fresh/
 # npm dependencies
 node_modules/
-db/*
+db/local
 !db/.gitkeep

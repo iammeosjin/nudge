@@ -159,7 +159,17 @@ const slackMessageBlocks = result.reduce((accum: SlackBlock[], curr) => {
 }, []);
 
 if (!isEmpty(slackMessageBlocks)) {
-	console.log(slackMessageBlocks);
+	console.log([
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `:john_alert:  *Quick Check* :john_alert:`,
+			},
+		},
+		,
+		...slackMessageBlocks,
+	]);
 	// send slack message
 }
 
