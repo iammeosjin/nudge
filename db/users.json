@@ -4,21 +4,24 @@
 		"github": "Eerie-Cson",
 		"jira": "5fcfdbcecb350d006830c2b2",
 		"name": "Ericson Sacdalan",
-		"slack": "D04C50VEG49"
+		"slack": "D04C50VEG49",
+		"emoji": ":ericson_smile:"
 	},
 	{
 		"department": "BACKEND",
 		"github": "johnmark83",
 		"jira": "70121:bdbc5579-d911-4300-a559-0fdde913907b",
 		"name": "John Mark Bautista",
-		"slack": "D04P1JMJY72"
+		"slack": "D04P1JMJY72",
+		"emoji": ":jm_smile:"
 	},
 	{
 		"department": "BACKEND",
 		"github": "klienn",
 		"jira": "5f98b79f048052006be65464",
 		"name": "Klien Menard Luminarias",
-		"slack": "D05MCP1V90X"
+		"slack": "D05MCP1V90X",
+		"emoji": ":menardlvl1:"
 	},
 	{
 		"department": "BACKEND",
@@ -33,20 +36,23 @@
 		"github": "silemi5",
 		"jira": "5fb5d37b3b4f59006862702d",
 		"name": "Emir Jo Jr",
-		"slack": "D01F607FJ1G"
+		"slack": "D01F607FJ1G",
+		"emoji": ":emir_help:"
 	},
 	{
 		"department": "BACKEND",
 		"github": "jmrcmendoza",
 		"jira": "606436d08d057500687844f6",
 		"name": "Jason Marc Mendoza",
-		"slack": "D02RRRJRL91"
+		"slack": "D02RRRJRL91",
+		"emoji": ":jason_oopsies:"
 	},
 	{
 		"department": "BACKEND",
 		"github": "iammeosjin",
 		"jira": "5c7759ef36ce822fe7285181",
 		"name": "John Michael Roa",
-		"slack": "DFY2J421M"
+		"slack": "DFY2J421M",
+		"emoji": ":roa_sleepy:"
 	}
 ]

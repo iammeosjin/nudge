@@ -5,6 +5,7 @@ import Bluebird from 'npm:bluebird';
 import { PullRequest, Trigger, TriggerType } from '../types.ts';
 import { GithubAPI, GithubRequestOptions } from '../apis/github.ts';
 import { TIMEZONE } from './constants.ts';
+import getUser from './get-user.ts';
 
 type ProcessedResult = {
 	triggers: Trigger[];
@@ -35,7 +36,7 @@ export default async function consumeGithubPullRequests(
 			const trigger = {
 				link: pr.permalink,
 				key: pr.headRefName,
-				recipient: pr.author,
+				recipient: getUser({ github: pr.author }),
 			};
 			const now = DateTime.now().setZone(TIMEZONE);
 			if (

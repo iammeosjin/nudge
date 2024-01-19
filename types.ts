@@ -124,7 +124,7 @@ export type Trigger = {
 	body: {
 		link: string;
 		key: string;
-		recipient: string;
+		recipient?: User;
 	};
 	lastTriggeredAt?: string;
 };
@@ -145,4 +145,13 @@ export type SlackBlock = {
 		type: string;
 		text: string;
 	}[];
+};
+
+export type User = {
+	department: 'BACKEND' | 'FRONTEND' | 'SQA';
+	name: string;
+	github?: string;
+	jira?: string;
+	slack?: string;
+	emoji?: string;
 };

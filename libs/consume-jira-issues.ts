@@ -10,6 +10,7 @@ import {
 } from '../types.ts';
 import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
+import getUser from './get-user.ts';
 
 type ProcessedResult = {
 	triggers: Trigger[];
@@ -95,7 +96,7 @@ export default async function consumeJiraIssues(
 			const trigger = {
 				link: `https://identifi.atlassian.net/browse/${issue.key}`,
 				key: issue.key,
-				recipient: issue.assignee,
+				recipient: getUser({ jira: issue.assignee }),
 			};
 
 			if (

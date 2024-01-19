@@ -45,6 +45,12 @@ const triggers: Trigger[] = concat(
 	}).then((res) => res.triggers),
 );
 
+/*
+ * group triggers by type
+ * map each group and check if the trigger is already triggered
+ * get all links and recipients from valid triggers
+ * generate slack blocks
+ */
 const result = await Bluebird.map(
 	toPairs(groupBy((t: Trigger) => t.type, triggers)),
 	async ([type, triggersGroupedByType]: [TriggerType, Trigger[]]) => {
@@ -91,17 +97,26 @@ const result = await Bluebird.map(
 		// generate blocks for slack
 		const contents = triggers.reduce((accum, curr) => {
 			accum.links.push(curr.body.link);
-			accum.recipients.push(curr.body.recipient);
+			if (curr.body.recipient?.slack) {
+				accum.recipients.push(
+					[
+						curr.body.recipient.emoji || undefined,
+						`<@${curr.body.recipient.slack}>`,
+					].filter((r) => !!r).join(' '),
+				);
+			}
+
 			return accum;
 		}, {
 			links: [],
 			recipients: [],
 		} as { links: string[]; recipients: string[] });
+
 		let title: string | undefined;
 		if (type === TriggerType.T1) {
 			title = 'Tasks are ready to be tested by our QAs';
 		} else if (type === TriggerType.T2) {
-			title = 'All subtasks are done';
+			title = 'All subtasks are done, kindly update the status';
 		}
 		if (type === TriggerType.T3) {
 			title = 'Pull request is in stale for more than 5 minutes';
@@ -116,36 +131,44 @@ const result = await Bluebird.map(
 			title = 'Are we sure these tasks are ready for testing?';
 		}
 
+		const blocks = [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: title,
+				},
+			},
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: '```' + contents.links.join('\n') + '```',
+				},
+			},
+		] as SlackBlock[];
+
+		if (!isEmpty(contents.recipients)) {
+			blocks.push(
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `cc: ${contents.recipients.join(', ')}`,
+					},
+				},
+			);
+		}
+
 		return {
-			blocks: [
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text: title,
-					},
-				},
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text: '```' + contents.links.join('\n') + '```',
-					},
-				},
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text: `cc: ${contents.recipients.join(', ')}}`,
-					},
-				},
-			] as SlackBlock[],
+			blocks,
 			triggers: triggers,
 		};
 	},
 	{ concurrency: 20 },
 );
 
+// join all slack message blocks
 const slackMessageBlocks = result.reduce((accum: SlackBlock[], curr) => {
 	if (isEmpty(curr.blocks)) return accum;
 
@@ -158,6 +181,7 @@ const slackMessageBlocks = result.reduce((accum: SlackBlock[], curr) => {
 	];
 }, []);
 
+// add header message to slack message blocks
 if (!isEmpty(slackMessageBlocks)) {
 	console.log([
 		{
@@ -167,12 +191,13 @@ if (!isEmpty(slackMessageBlocks)) {
 				text: `:john_alert:  *Quick Check* :john_alert:`,
 			},
 		},
-		,
+		{ type: 'divider' },
 		...slackMessageBlocks,
 	]);
-	// send slack message
+	// should send slack message
 }
 
+// update lastTriggeredAt for each trigger
 await Bluebird.map(result, async (res) => {
 	await Bluebird.map(res.triggers, async (t) => {
 		await addTrigger({
@@ -182,6 +207,7 @@ await Bluebird.map(result, async (res) => {
 	}, { concurrency: 20 });
 });
 
+// delete task model to remove cache
 await Bluebird.map(
 	await TriggerModel.list(),
 	(t) => TriggerModel.delete(t.id),
