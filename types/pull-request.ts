@@ -38,8 +38,5 @@ export type PullRequest = {
 	createdAt: string;
 	headRefName: string;
 	author: string;
-	reviewers: string[];
-	firstReviewer: string;
 	permalink: string;
-	issues: string[];
 };
