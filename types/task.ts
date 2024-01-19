@@ -14,6 +14,7 @@ export enum JiraStatus {
 	READY = 'Ready',
 	IN_PROGRESS = 'In Progress',
 	DONE = 'Done',
+	CANCELED = 'Canceled',
 	UAT_FAILED_PRODUCTION = 'UAT Failed (Production)',
 	UAT_FAILED_STAGING = 'UAT Failed (Staging)',
 	UAT_PRODUCTION = 'UAT (Production)',

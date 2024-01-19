@@ -35,7 +35,7 @@ export class JiraAPI {
 	> {
 		const query = [
 			'project = "ROW"',
-			`status IN (Ready, "In Progress") and type in (Bug, Story, standardIssueTypes())`,
+			`key = 'ROW-6763' and status IN (Ready, "In Progress") and type in (Bug, Story, standardIssueTypes())`,
 		].filter((index) => !!index).join(' AND ');
 
 		const jql =
@@ -49,6 +49,7 @@ export class JiraAPI {
 				expand: ['changelog'],
 				fields: [
 					'parent',
+					'summary',
 					'issuetype',
 					'assignee',
 					'reporter',
