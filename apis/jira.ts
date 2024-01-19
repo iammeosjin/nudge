@@ -49,6 +49,7 @@ export class JiraAPI {
 				expand: ['changelog'],
 				fields: [
 					'parent',
+					'summary',
 					'issuetype',
 					'assignee',
 					'reporter',
