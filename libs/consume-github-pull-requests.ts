@@ -46,16 +46,16 @@ export default async function consumeGithubPullRequests(
 					),
 				) > 5
 			) {
-				console.log('T3', pr);
 				acc.push({
+					id: [pr.headRefName],
 					type: TriggerType.T3,
 					body: trigger,
 				});
 			}
 
 			if (now.hour >= 17 && now.minute >= 30) {
-				console.log('T4', pr);
 				acc.push({
+					id: [pr.headRefName],
 					type: TriggerType.T4,
 					body: trigger,
 				});
@@ -66,7 +66,7 @@ export default async function consumeGithubPullRequests(
 		result.triggers,
 	);
 
-	if (response.hasNextPage && response.startCursor) {
+	if (response.hasNextPage && response.endCursor) {
 		return consumeGithubPullRequests(result, {
 			...options,
 			after: response.endCursor as string,

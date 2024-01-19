@@ -41,6 +41,8 @@ export class JiraAPI {
 		const jql =
 			`${query} ORDER BY created DESC, resolved DESC, status DESC, updated DESC`;
 
+		console.log(jql);
+
 		const result = await jiraClient.searchJira(
 			jql,
 			{

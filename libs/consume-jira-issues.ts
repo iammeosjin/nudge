@@ -42,7 +42,9 @@ export default async function consumeJiraIssues(
 	result.triggers = await Bluebird.reduce(
 		response.issues,
 		(acc: Trigger[], issue: Issue) => {
-			const breakdown = (issue.subTasks || []).reduce(
+			const subTasks = issue.subTasks || [];
+			if (isEmpty(subTasks)) return acc;
+			const breakdown = subTasks.reduce(
 				(accum, curr) => {
 					if (
 						(curr.summary || '').toLowerCase().includes(
@@ -104,8 +106,8 @@ export default async function consumeJiraIssues(
 					cardStatuses.includes(JiraStatus.IN_PROGRESS) ||
 					cardStatuses.includes(JiraStatus.READY)
 				) {
-					console.log('T5');
 					acc.push({
+						id: [issue.key],
 						type: TriggerType.T5,
 						body: trigger,
 					});
@@ -117,8 +119,8 @@ export default async function consumeJiraIssues(
 				allDevCardsDone &&
 				!isEmpty(atCards) && atCardStatuses.includes(JiraStatus.BACKLOG)
 			) {
-				console.log('T1');
 				acc.push({
+					id: [issue.key],
 					type: TriggerType.T1,
 					body: trigger,
 				});
@@ -127,8 +129,8 @@ export default async function consumeJiraIssues(
 				allAtCardsDone &&
 				issue.status === JiraStatus.IN_PROGRESS
 			) {
-				console.log('T2');
 				acc.push({
+					id: [issue.key],
 					type: TriggerType.T2,
 					body: trigger,
 				});
@@ -137,8 +139,8 @@ export default async function consumeJiraIssues(
 				(atCardStatuses.includes(JiraStatus.IN_PROGRESS) ||
 					atCardStatuses.includes(JiraStatus.READY))
 			) {
-				console.log('T6');
 				acc.push({
+					id: [issue.key],
 					type: TriggerType.T6,
 					body: trigger,
 				});
@@ -149,6 +151,11 @@ export default async function consumeJiraIssues(
 		result.triggers,
 	);
 
+	console.log(
+		'JIRA page',
+		response.startAt + response.maxResults,
+		response.total,
+	);
 	if ((response.startAt + response.maxResults) < response.total) {
 		return consumeJiraIssues(result, {
 			...options,

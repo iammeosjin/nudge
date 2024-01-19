@@ -119,10 +119,30 @@ export enum TriggerType {
 }
 
 export type Trigger = {
+	id: ID;
 	type: TriggerType;
 	body: {
 		link: string;
 		key: string;
 		recipient: string;
 	};
+	lastTriggeredAt?: string;
+};
+
+export type ID = (string | number)[];
+
+export type KVEntry = {
+	id: ID;
+};
+
+export type SlackBlock = {
+	type: string;
+	text?: {
+		type: string;
+		text: string;
+	};
+	elements?: {
+		type: string;
+		text: string;
+	}[];
 };
