@@ -50,19 +50,18 @@ export default async function jiraIssuesConsumer<T>(
 			devCardsDone: hasDevCards && !inProgressDevCards,
 		};
 
-		console.log(criteria)
-
 		if (
 			criteria.hasDevCards && criteria.devCardsDone &&
 			criteria.hasATCard && criteria.aTCardStatus === JiraStatus.BACKLOG
 		) {
-			console.log('A1')
+			console.log('A1');
 			acc.push(issue);
 		} else if (
 			criteria.hasDevCards && criteria.devCardsDone &&
-			criteria.hasATCard && criteria.aTCardStatus === JiraStatus.DONE && criteria.cardStatus === JiraStatus.IN_PROGRESS
+			criteria.hasATCard && criteria.aTCardStatus === JiraStatus.DONE &&
+			criteria.cardStatus === JiraStatus.IN_PROGRESS
 		) {
-			console.log('A2')
+			console.log('A2');
 			acc.push(issue);
 		}
 
