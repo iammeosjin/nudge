@@ -1,3 +1,46 @@
+export type PullRequestResponse = {
+	title: string;
+	merged: boolean;
+	state: string;
+	number: number;
+	createdAt: string;
+	mergedAt: string;
+	updatedAt: string;
+	closedAt: string;
+	headRefName: string;
+	reviews: {
+		nodes: {
+			state: string;
+			author: {
+				login: string;
+			};
+		}[];
+		pageInfo: {
+			endCursor?: string;
+			hasNextPage: boolean;
+		};
+		totalCount: number;
+	};
+	author: { login: string };
+	body: string;
+	permalink: string;
+};
+
+export type GithubAPIRepository = {
+	owner: string;
+	repo: string;
+};
+
+export type PullRequest = {
+	merged: boolean;
+	mergedAt: string;
+	updatedAt: string;
+	createdAt: string;
+	headRefName: string;
+	author: string;
+	permalink: string;
+};
+
 export enum JiraIssueType {
 	EPIC = 'EPIC',
 	BUG = 'BUG',
@@ -21,13 +64,6 @@ export enum JiraStatus {
 	UAT_STAGING = 'UAT (Staging)',
 	READY_FOR_RELEASE = 'Ready for Release',
 }
-
-export type NudgeCriteria = {
-	hasATCard: boolean;
-	aTCardStatus: JiraStatus;
-	cardStatus: JiraStatus;
-	devCardsDone: boolean;
-};
 
 export interface Issue {
 	key: string;
@@ -66,4 +102,27 @@ export type JiraRequestOptions = {
 	startAt: number;
 	maxResults: number;
 	total: number;
+};
+
+export enum Team {
+	OPEXA = 'opexa',
+	NEXIUX = 'nexiux',
+}
+
+export enum TriggerType {
+	T1 = 'all subtasks are done but the acceptance testing card still in backlog status',
+	T2 = 'all subtasks are done including the acceptance testing but the parent card still in progress status',
+	T3 = 'pull request is in stale for more than 5 minutes',
+	T4 = 'there are pending pull request or subtasks on the closing hours',
+	T5 = 'task is not in progress status but have subtask that are already in progress',
+	T6 = 'there are acceptance testing that are in ready or in progress but other subtask are not done yet',
+}
+
+export type Trigger = {
+	type: TriggerType;
+	body: {
+		link: string;
+		key: string;
+		recipient: string;
+	};
 };

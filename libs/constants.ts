@@ -1,4 +1,4 @@
-import { Team } from '../types/common.ts';
+import { Team } from '../types.ts';
 
 export const TIMEZONE = 'Asia/Manila';
 

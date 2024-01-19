@@ -1,5 +1,5 @@
 import octokit from '../libs/octokit.ts';
-import { PullRequest, PullRequestResponse } from '../types/pull-request.ts';
+import { PullRequest, PullRequestResponse } from '../types.ts';
 
 const PULL_REQUEST_QUERY = `query pullRequests(
     $owner: String!

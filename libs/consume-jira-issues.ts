@@ -1,21 +1,27 @@
 import { JiraAPI } from '../apis/jira.ts';
 // @deno-types=npm:@types/bluebird
 import Bluebird from 'npm:bluebird';
-import { Issue, JiraRequestOptions, JiraStatus } from '../types/task.ts';
+import {
+	Issue,
+	JiraRequestOptions,
+	JiraStatus,
+	Trigger,
+	TriggerType,
+} from '../types.ts';
 import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 
 type ProcessedResult = {
-	triggers: Issue[];
+	triggers: Trigger[];
 };
 
 /*
- * A1: when all subtasks are done but the acceptance testing card still in "backlog" status
- * A2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
- * A3: when pull request is in stale for more than 5 minutes
- * A4: when there are pending pull request or subtasks on the closing hours
- * A5: when there are parent card that are not in progress status but have children that are already in progress
- * A6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
+ * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
+ * T2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
+ * T3: when pull request is in stale for more than 5 minutes
+ * T4: when there are pending pull request or subtasks on the closing hours
+ * T5: when there are parent card that are not in progress status but have children that are already in progress
+ * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
  */
 
 type SubTaskBreakdwon = {
@@ -35,7 +41,7 @@ export default async function consumeJiraIssues(
 
 	result.triggers = await Bluebird.reduce(
 		response.issues,
-		(acc: Issue[], issue: Issue) => {
+		(acc: Trigger[], issue: Issue) => {
 			const {
 				atCards,
 				devCards,
@@ -78,13 +84,22 @@ export default async function consumeJiraIssues(
 				} as SubTaskBreakdwon,
 			);
 
+			const trigger = {
+				link: `https://identifi.atlassian.net/browse/${issue.key}`,
+				key: issue.key,
+				recipient: issue.assignee,
+			};
+
 			if (issue.status === JiraStatus.READY) {
 				if (
 					cardStatuses.includes(JiraStatus.IN_PROGRESS) ||
 					cardStatuses.includes(JiraStatus.DONE)
 				) {
-					console.log('A5');
-					acc.push(issue);
+					console.log('T5');
+					acc.push({
+						type: TriggerType.T5,
+						body: trigger,
+					});
 					return acc;
 				}
 			} else if (issue.status === JiraStatus.BACKLOG) {
@@ -92,8 +107,11 @@ export default async function consumeJiraIssues(
 					cardStatuses.includes(JiraStatus.IN_PROGRESS) ||
 					cardStatuses.includes(JiraStatus.READY)
 				) {
-					console.log('A5');
-					acc.push(issue);
+					console.log('T5');
+					acc.push({
+						type: TriggerType.T5,
+						body: trigger,
+					});
 					return acc;
 				}
 			}
@@ -102,15 +120,21 @@ export default async function consumeJiraIssues(
 				!isEmpty(devCards) && allDevCardsDone &&
 				!isEmpty(atCards) && atCardStatuses.includes(JiraStatus.BACKLOG)
 			) {
-				console.log('A1');
-				acc.push(issue);
+				console.log('T1');
+				acc.push({
+					type: TriggerType.T1,
+					body: trigger,
+				});
 			} else if (
 				!isEmpty(devCards) && allDevCardsDone &&
 				!isEmpty(atCards) && allAtCardsDone &&
 				issue.status === JiraStatus.IN_PROGRESS
 			) {
-				console.log('A2');
-				acc.push(issue);
+				console.log('T2');
+				acc.push({
+					type: TriggerType.T2,
+					body: trigger,
+				});
 			}
 
 			return acc;

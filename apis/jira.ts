@@ -7,7 +7,7 @@ import {
 	JiraIssueType,
 	JiraRequestOptions,
 	JiraStatus,
-} from '../types/task.ts';
+} from '../types.ts';
 
 const issueTypes = {
 	'10000': 'EPIC',

@@ -2,21 +2,21 @@
 import { DateTime } from 'npm:luxon';
 // @deno-types=npm:@types/bluebird
 import Bluebird from 'npm:bluebird';
-import { PullRequest } from '../types/pull-request.ts';
+import { PullRequest, Trigger, TriggerType } from '../types.ts';
 import { GithubAPI, GithubRequestOptions } from '../apis/github.ts';
 import { TIMEZONE } from './constants.ts';
 
 type ProcessedResult = {
-	triggers: PullRequest[];
+	triggers: Trigger[];
 };
 
 /*
- * A1: when all subtasks are done but the acceptance testing card still in "backlog" status
- * A2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
- * A3: when pull request is in stale for more than 5 minutes
- * A4: when there are pending pull request or subtasks on the closing hours
- * A5: when there are parent card that are not in progress status but have children that are already in progress
- * A6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
+ * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
+ * T2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
+ * T3: when pull request is in stale for more than 5 minutes
+ * T4: when there are pending pull request or subtasks on the closing hours
+ * T5: when there are parent card that are not in progress status but have children that are already in progress
+ * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
  */
 
 export default async function consumeGithubPullRequests(
@@ -27,9 +27,14 @@ export default async function consumeGithubPullRequests(
 
 	result.triggers = await Bluebird.reduce(
 		response.pullRequests,
-		(acc: PullRequest[], pr: PullRequest) => {
+		(acc: Trigger[], pr: PullRequest) => {
 			if (pr.merged) return acc;
-
+			const trigger = {
+				link: pr.permalink,
+				key: pr.headRefName,
+				recipient: pr.author,
+			};
+			const now = DateTime.now().setZone(TIMEZONE);
 			if (
 				Math.floor(
 					Math.abs(
@@ -38,8 +43,19 @@ export default async function consumeGithubPullRequests(
 					),
 				) > 5
 			) {
-				console.log('A3', pr);
-				acc.push(pr);
+				console.log('T3', pr);
+				acc.push({
+					type: TriggerType.T3,
+					body: trigger,
+				});
+			}
+
+			if (now.hour >= 17 && now.minute >= 30) {
+				console.log('T4', pr);
+				acc.push({
+					type: TriggerType.T4,
+					body: trigger,
+				});
 			}
 
 			return acc;
