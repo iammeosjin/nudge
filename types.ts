@@ -155,3 +155,8 @@ export type User = {
 	slack?: string;
 	emoji?: string;
 };
+
+export type Job = {
+	id: ID;
+	status: 'READY' | 'RUNNING' | 'DONE' | 'FAILED';
+};
