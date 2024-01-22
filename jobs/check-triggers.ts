@@ -1,13 +1,14 @@
+import { addJob, getJob } from '../controllers/job.ts';
 import processTriggers from '../libs/process-triggers.ts';
-import JobModel from '../models/job.ts';
 import { ID } from '../types.ts';
 
 export default async function checkTriggersJob(id: ID) {
-	const job = await JobModel.get(id);
+	const job = await getJob(id);
+	console.log(`Running job ${id.join('-')}`, job);
 	if (!job) return;
 	if (job.status !== 'READY') return;
 
-	await JobModel.insert({
+	await addJob({
 		id,
 		status: 'RUNNING',
 	});
@@ -16,7 +17,7 @@ export default async function checkTriggersJob(id: ID) {
 	await processTriggers();
 	console.log(`Job ${id.join('-')} took ${Date.now() - start}ms`);
 
-	await JobModel.insert({
+	await addJob({
 		id,
 		status: 'READY',
 	});

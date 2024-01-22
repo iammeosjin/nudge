@@ -4,6 +4,9 @@ import Bluebird from 'npm:bluebird';
 
 import JobModel from './models/job.ts';
 import TriggerModel from './models/trigger.ts';
+import { lastTrigger } from './libs/process-triggers.ts';
+import checkTriggersJob from './jobs/check-triggers.ts';
+import { addTrigger } from './controllers/trigger.ts';
 
 const users = await Deno.readTextFile('./db/users.json').then((content) =>
 	JSON.parse(content)
@@ -21,6 +24,14 @@ const users = await Deno.readTextFile('./db/users.json').then((content) =>
 // 		await requestEvent.respondWith(response);
 // 	}
 // }
+
+Deno.cron('check-triggers', '*/2 * * * *', async () => {
+	await checkTriggersJob(['check-triggers']);
+	// await Bluebird.map(
+	// 	await TriggerModel.list(),
+	// 	(t) => TriggerModel.delete(t.id),
+	// );
+});
 
 Deno.serve(async (req) => {
 	const url = new URL(req.url);
@@ -41,8 +52,18 @@ Deno.serve(async (req) => {
 		return new Response(JSON.stringify(await JobModel.list(), null, 2));
 	}
 
+	if (req.method === 'POST' && url.pathname === '/api/jobs') {
+		const body = await req.json();
+		await addTrigger(body);
+		return new Response('OK');
+	}
+
 	if (req.method === 'GET' && url.pathname === '/api/triggers') {
 		return new Response(JSON.stringify(await TriggerModel.list(), null, 2));
+	}
+
+	if (req.method === 'GET' && url.pathname === '/api/last-trigger') {
+		return new Response(JSON.stringify(lastTrigger, null, 2));
 	}
 
 	if (req.method === 'DELETE' && url.pathname === '/api/triggers') {

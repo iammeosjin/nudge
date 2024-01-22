@@ -10,5 +10,7 @@ deno.lock
 _fresh/
 # npm dependencies
 node_modules/
-db/local
+db/
 !db/.gitkeep
+!db/jira-users.json
+!db/users.json

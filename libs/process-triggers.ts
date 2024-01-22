@@ -13,6 +13,9 @@ import { GITHUB_REPOSITORIES } from './constants.ts';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import { addTrigger, getTrigger } from '../controllers/trigger.ts';
 
+export let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } =
+	{};
+
 export default async function processTriggers() {
 	// get all triggers and merge them
 	const triggers: Trigger[] = concat(
@@ -173,7 +176,10 @@ export default async function processTriggers() {
 		]);
 		// should send slack message
 	}
-
+	lastTrigger = {
+		lastTriggerAt: DateTime.now().toISO() as string,
+		triggers: slackMessageBlocks,
+	};
 	// update lastTriggeredAt for each trigger
 	await Bluebird.map(result, async (res) => {
 		await Bluebird.map(res.triggers, async (t) => {
