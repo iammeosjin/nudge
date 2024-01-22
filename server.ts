@@ -4,7 +4,7 @@ import Bluebird from 'npm:bluebird';
 
 import JobModel from './models/job.ts';
 import TriggerModel from './models/trigger.ts';
-import { lastTrigger } from './libs/process-triggers.ts';
+import { getLastTrigger } from './libs/process-triggers.ts';
 import checkTriggersJob from './jobs/check-triggers.ts';
 import { addJob } from './controllers/job.ts';
 
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
 	}
 
 	if (req.method === 'GET' && url.pathname === '/api/last-trigger') {
-		return new Response(JSON.stringify(lastTrigger, null, 2));
+		return new Response(JSON.stringify(getLastTrigger(), null, 2));
 	}
 	if (req.method === 'DELETE' && url.pathname === '/api/triggers') {
 		await Bluebird.map(

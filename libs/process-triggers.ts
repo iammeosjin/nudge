@@ -15,8 +15,11 @@ import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import { addTrigger, getTrigger } from '../controllers/trigger.ts';
 import slackClient from './slack-client.ts';
 
-export let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } =
-	{};
+let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } = {};
+
+export function getLastTrigger() {
+	return lastTrigger;
+}
 
 export default async function processTriggers() {
 	// get all triggers and merge them
