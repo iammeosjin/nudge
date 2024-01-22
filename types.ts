@@ -1,3 +1,5 @@
+import { AnyMessageBlock } from 'https://deno.land/x/slack_web_api_client@0.7.6/index.ts';
+
 export type PullRequestResponse = {
 	title: string;
 	merged: boolean;
@@ -135,17 +137,7 @@ export type KVEntry = {
 	id: ID;
 };
 
-export type SlackBlock = {
-	type: string;
-	text?: {
-		type: string;
-		text: string;
-	};
-	elements?: {
-		type: string;
-		text: string;
-	}[];
-};
+export type SlackBlock = AnyMessageBlock;
 
 export type User = {
 	department: 'BACKEND' | 'FRONTEND' | 'SQA';

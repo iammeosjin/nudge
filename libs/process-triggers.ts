@@ -1,4 +1,5 @@
 import '$std/dotenv/load.ts';
+
 // @deno-types=npm:@types/bluebird
 import Bluebird from 'npm:bluebird';
 // @deno-types=npm:@types/luxon
@@ -12,6 +13,7 @@ import { SlackBlock, Team, Trigger, TriggerType } from '../types.ts';
 import { GITHUB_REPOSITORIES } from './constants.ts';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import { addTrigger, getTrigger } from '../controllers/trigger.ts';
+import slackClient from './slack-client.ts';
 
 export let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } =
 	{};
@@ -149,31 +151,53 @@ export default async function processTriggers() {
 	);
 
 	// join all slack message blocks
-	const slackMessageBlocks = result.reduce((accum: SlackBlock[], curr) => {
-		if (isEmpty(curr.blocks)) return accum;
+	const slackMessageBlocks: SlackBlock[] = result.reduce(
+		(accum: SlackBlock[], curr) => {
+			if (isEmpty(curr.blocks)) return accum;
 
-		if (isEmpty(accum)) return curr.blocks;
+			if (isEmpty(accum)) return curr.blocks;
 
-		return [
-			...accum,
-			{ type: 'divider' },
-			...curr.blocks,
-		];
-	}, []);
+			return [
+				...accum,
+				{ type: 'divider' },
+				...curr.blocks,
+			];
+		},
+		[],
+	);
 
 	// add header message to slack message blocks
 	if (!isEmpty(slackMessageBlocks)) {
-		console.log([
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `:john_alert:  *Quick Check* :john_alert:`,
+		console.log({
+			channel: Deno.env.get('CHANNEL_ID') as string,
+			text: 'Quest Check',
+			blocks: [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `:john_alert:  *Quick Check* :john_alert:`,
+					},
 				},
-			},
-			{ type: 'divider' },
-			...slackMessageBlocks,
-		]);
+				{ type: 'divider' },
+				...slackMessageBlocks,
+			],
+		});
+		slackClient.chat.postMessage({
+			channel: 'C02T233MQFL',
+			text: 'Quest Check',
+			blocks: [
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text: `:john_alert:  *Quick Check* :john_alert:`,
+					},
+				},
+				{ type: 'divider' },
+				...slackMessageBlocks,
+			],
+		});
 		// should send slack message
 	}
 	lastTrigger = {
