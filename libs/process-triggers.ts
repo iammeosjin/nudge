@@ -171,46 +171,37 @@ export default async function processTriggers() {
 
 	// add header message to slack message blocks
 	if (!isEmpty(slackMessageBlocks)) {
+		const blocks = [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `:john_alert:  *Quick Check* :john_alert: <!here>`,
+				},
+			},
+			{ type: 'divider' },
+			...slackMessageBlocks,
+			{ type: 'divider' },
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text:
+						'_italic_ Note: Cards status above will be recheck after 30 minutes _italic_',
+				},
+			},
+		] as SlackBlock[];
 		console.log({
 			channel: Deno.env.get('CHANNEL_ID') as string,
 			text: 'Quest Check',
-			blocks: [
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text:
-							`:john_alert:  *Quick Check* :john_alert: <!here>`,
-					},
-				},
-				{ type: 'divider' },
-				...slackMessageBlocks,
-				{ type: 'divider' },
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text:
-							'_italic_ Note: Cards status above will be recheck after 30 minutes _italic_',
-					},
-				},
-			] as SlackBlock[],
+			blocks: blocks,
 		});
 		slackClient.chat.postMessage({
 			channel: Deno.env.get('CHANNEL_ID') as string,
 			text: 'Quest Check',
-			blocks: [
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text: `:john_alert:  *Quick Check* :john_alert:`,
-					},
-				},
-				{ type: 'divider' },
-				...slackMessageBlocks,
-			],
+			blocks: blocks,
 			parse: 'full',
+			link_names: true,
 		});
 		// should send slack message
 	}
