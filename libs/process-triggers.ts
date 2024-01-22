@@ -18,6 +18,7 @@ import slackClient from './slack-client.ts';
 let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } = {};
 
 export function getLastTrigger() {
+	console.log('getLastTrigger', lastTrigger);
 	return lastTrigger;
 }
 
@@ -209,6 +210,7 @@ export default async function processTriggers() {
 		lastTriggerAt: DateTime.now().toISO() as string,
 		triggers: slackMessageBlocks,
 	};
+	console.log('lastTrigger', lastTrigger);
 	// update lastTriggeredAt for each trigger
 	await Bluebird.map(result, async (res) => {
 		await Bluebird.map(res.triggers, async (t) => {
