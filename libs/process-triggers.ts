@@ -59,7 +59,7 @@ export default async function processTriggers() {
 						),
 					);
 
-					const maxDiffInMinutes = 30;
+					let maxDiffInMinutes = 30;
 
 					/*
 				allow trigger to have differ alert gaps based on trigger type
@@ -67,6 +67,10 @@ export default async function processTriggers() {
 					maxDiffInMinutes = 60;
 				}
 				*/
+					if (trigger.type === TriggerType.T7) {
+						maxDiffInMinutes = 60;
+						return null;
+					}
 
 					if (diffInMinutes < maxDiffInMinutes) {
 						return null;
@@ -87,7 +91,7 @@ export default async function processTriggers() {
 					accum.recipients.push(
 						[
 							curr.body.recipient.emoji || undefined,
-							`<@${curr.body.recipient.slack.trim()}> `,
+							`<@${curr.body.recipient.slack.trim()}>`,
 						].filter((r) => !!r).join(' '),
 					);
 				}
@@ -115,6 +119,10 @@ export default async function processTriggers() {
 			}
 			if (type === TriggerType.T6) {
 				title = 'Are we sure these tasks are ready for testing?';
+			}
+
+			if (type === TriggerType.T7) {
+				title = 'Can we check if these cards needs acceptance testing?';
 			}
 
 			const blocks = [
@@ -177,7 +185,7 @@ export default async function processTriggers() {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `:john_alert:  *Quick Check* :john_alert: <!here> `,
+					text: `:john_alert:  *Quick Check* :john_alert:`,
 				},
 			},
 			{ type: 'divider' },
@@ -191,6 +199,14 @@ export default async function processTriggers() {
 						'_Note: Cards status above will be recheck after 30 minutes_',
 				},
 			},
+			{ type: 'divider' },
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: 'cc: <@U01FV9A3JK0> <@UFYD1NRGE>',
+				},
+			},
 		] as SlackBlock[];
 		console.log({
 			channel: Deno.env.get('CHANNEL_ID') as string,
@@ -201,8 +217,6 @@ export default async function processTriggers() {
 			channel: Deno.env.get('CHANNEL_ID') as string,
 			text: 'Quest Check',
 			blocks: blocks,
-			as_user: true,
-			link_names: true,
 		});
 		// should send slack message
 	}

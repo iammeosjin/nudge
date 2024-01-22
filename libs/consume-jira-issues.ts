@@ -23,6 +23,7 @@ type ProcessedResult = {
  * T4: when there are pending pull request or subtasks on the closing hours
  * T5: when there are parent card that are not in progress status but have children that are already in progress
  * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
+ * T7: when there is no acceptance testing
  */
 
 type SubTaskBreakdwon = {
@@ -59,7 +60,8 @@ export default async function consumeJiraIssues(
 					} else {
 						accum.devCards.push(curr);
 						accum.allDevCardsDone = accum.allDevCardsDone &&
-							curr.status === JiraStatus.DONE;
+							(curr.status === JiraStatus.DONE ||
+								curr.status === JiraStatus.CANCELED);
 					}
 
 					accum.cardStatuses.push(curr.status);
@@ -114,6 +116,17 @@ export default async function consumeJiraIssues(
 					});
 					return acc;
 				}
+			}
+
+			if (
+				issue.status === JiraStatus.IN_PROGRESS && isEmpty(atCards) &&
+				!isEmpty(devCards)
+			) {
+				acc.push({
+					id: [issue.key],
+					type: TriggerType.T7,
+					body: trigger,
+				});
 			}
 
 			if (

@@ -118,6 +118,7 @@ export enum TriggerType {
 	T4 = 'there are pending pull request or subtasks on the closing hours',
 	T5 = 'task is not in progress status but have subtask that are already in progress',
 	T6 = 'there are acceptance testing that are in ready or in progress but other subtask are not done yet',
+	T7 = 'there is no acceptance testing',
 }
 
 export type Trigger = {
