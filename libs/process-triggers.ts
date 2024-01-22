@@ -86,7 +86,7 @@ export default async function processTriggers() {
 					accum.recipients.push(
 						[
 							curr.body.recipient.emoji || undefined,
-							`<@${curr.body.recipient.slack.trim()}>`,
+							`<@${curr.body.recipient.slack.trim()}> `,
 						].filter((r) => !!r).join(' '),
 					);
 				}
@@ -176,7 +176,7 @@ export default async function processTriggers() {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `:john_alert:  *Quick Check* :john_alert: <!here>`,
+					text: `:john_alert:  *Quick Check* :john_alert: <!here> `,
 				},
 			},
 			{ type: 'divider' },
@@ -187,7 +187,7 @@ export default async function processTriggers() {
 				text: {
 					type: 'mrkdwn',
 					text:
-						'_italic_ Note: Cards status above will be recheck after 30 minutes _italic_',
+						'_Note: Cards status above will be recheck after 30 minutes_',
 				},
 			},
 		] as SlackBlock[];
