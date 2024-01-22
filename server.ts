@@ -44,6 +44,11 @@ Deno.serve(async (req) => {
 		return new Response('JIRA Response');
 	}
 
+	if (req.method === 'POST' && url.pathname === '/callback/slack') {
+		console.log(await req.text());
+		return new Response(undefined, { status: 200 });
+	}
+
 	if (url.searchParams.get('token') !== '123') {
 		return new Response(null, { status: 401 });
 	}
