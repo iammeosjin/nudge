@@ -14,6 +14,7 @@ import { GITHUB_REPOSITORIES } from './constants.ts';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import { addTrigger, getTrigger } from '../controllers/trigger.ts';
 import slackClient from './slack-client.ts';
+import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
 
 let lastTrigger: { lastTriggerAt?: string; triggers?: SlackBlock[] } = {};
 
@@ -148,7 +149,7 @@ export default async function processTriggers() {
 						type: 'section',
 						text: {
 							type: 'mrkdwn',
-							text: `cc: ${contents.recipients.join(', ')}`,
+							text: `cc: ${uniq(contents.recipients).join(', ')}`,
 						},
 					},
 				);
@@ -204,9 +205,10 @@ export default async function processTriggers() {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: 'cc: <@U01FV9A3JK0> <@UFYD1NRGE>',
+					text: 'kindly verify cc: <@U01FV9A3JK0> <@UFYD1NRGE>',
 				},
 			},
+			{ type: 'divider' },
 		] as SlackBlock[];
 		console.log({
 			channel: Deno.env.get('CHANNEL_ID') as string,
