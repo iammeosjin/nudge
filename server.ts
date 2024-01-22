@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 	}
 
 	if (req.method === 'POST' && url.pathname === '/callback/slack') {
-		console.log(await req.text());
+		console.log(await req.formData());
 		return new Response(undefined, { status: 200 });
 	}
 
