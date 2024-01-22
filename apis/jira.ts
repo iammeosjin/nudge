@@ -8,6 +8,7 @@ import {
 	JiraRequestOptions,
 	JiraStatus,
 } from '../types.ts';
+import { Task } from '../types.ts';
 
 const issueTypes = {
 	'10000': 'EPIC',
@@ -103,6 +104,68 @@ export class JiraAPI {
 					],
 					parent,
 					subTasks,
+				};
+			});
+
+		return {
+			...pick(['startAt', 'maxResults', 'total'])(result),
+			issues,
+		};
+	}
+
+	static async getTasks(
+		options?: Partial<JiraRequestOptions>,
+	): Promise<
+		JiraRequestOptions & {
+			issues: Issue[];
+		}
+	> {
+		const query = [
+			'project = "ROW"',
+			`status IN (Ready, "In Progress") and type in subTaskIssueTypes() and "Job Type[Dropdown]" IN (Backend, Frontend)`,
+		].filter((index) => !!index).join(' AND ');
+
+		const jql =
+			`${query} ORDER BY created DESC, resolved DESC, status DESC, updated DESC`;
+
+		const result = await jiraClient.searchJira(
+			jql,
+			{
+				maxResults: options?.maxResults || 10000,
+				startAt: options?.startAt,
+				fields: [
+					'summary',
+					'issuetype',
+					'assignee',
+					'reporter',
+					'created',
+					'updated',
+					'status',
+					'customfield_10813',
+				],
+			},
+		) as JiraRequestOptions & {
+			issues: {
+				key: string;
+				changelog: JiraChangeLogResponse;
+				fields: JiraIssueFieldsResponse;
+			}[];
+		};
+
+		const issues: Task[] = result.issues
+			.map((issue) => {
+				return {
+					key: issue.key,
+					summary: issue.fields.summary,
+					assignee: issue.fields?.assignee?.accountId,
+					reporter: issue.fields?.reporter?.accountId,
+					status: issue.fields?.status?.name as JiraStatus,
+					type: issueTypes[
+						issue.fields?.issuetype?.id
+					],
+					jobType: (issue.fields.customfield_10813?.value) as Task[
+						'jobType'
+					],
 				};
 			});
 

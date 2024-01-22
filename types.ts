@@ -78,6 +78,16 @@ export interface Issue {
 	subTasks: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
 }
 
+export interface Task {
+	key: string;
+	summary: string;
+	assignee: string;
+	reporter: string;
+	status: JiraStatus;
+	type: JiraIssueType;
+	jobType: 'Backend' | 'Frontend';
+}
+
 export type JiraIssueFieldsResponse = {
 	summary: string;
 	issuetype: { id: string };
@@ -86,6 +96,7 @@ export type JiraIssueFieldsResponse = {
 	parent?: { key: string; fields: JiraIssueFieldsResponse };
 	assignee: { accountId: string; displayName: string };
 	reporter: { accountId: string; displayName: string };
+	customfield_10813?: { value: string };
 	statuscategorychangedate: string;
 	updated: string;
 	created: string;
