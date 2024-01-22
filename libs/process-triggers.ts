@@ -200,7 +200,7 @@ export default async function processTriggers() {
 			channel: Deno.env.get('CHANNEL_ID') as string,
 			text: 'Quest Check',
 			blocks: blocks,
-			parse: 'full',
+			as_user: true,
 			link_names: true,
 		});
 		// should send slack message
