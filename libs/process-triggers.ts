@@ -83,7 +83,7 @@ export default async function processTriggers() {
 					accum.recipients.push(
 						[
 							curr.body.recipient.emoji || undefined,
-							`<@${curr.body.recipient.slack}>`,
+							`<@${curr.body.recipient.slack.trim()}>`,
 						].filter((r) => !!r).join(' '),
 					);
 				}
@@ -107,7 +107,7 @@ export default async function processTriggers() {
 				title = 'Kindly close before the day ends';
 			}
 			if (type === TriggerType.T5) {
-				title = 'These should be in In Progress status';
+				title = 'These cards should be in In Progress status';
 			}
 			if (type === TriggerType.T6) {
 				title = 'Are we sure these tasks are ready for testing?';
@@ -176,15 +176,25 @@ export default async function processTriggers() {
 					type: 'section',
 					text: {
 						type: 'mrkdwn',
-						text: `:john_alert:  *Quick Check* :john_alert:`,
+						text:
+							`:john_alert:  *Quick Check* :john_alert: <!here>`,
 					},
 				},
 				{ type: 'divider' },
 				...slackMessageBlocks,
-			],
+				{ type: 'divider' },
+				{
+					type: 'section',
+					text: {
+						type: 'mrkdwn',
+						text:
+							'_italic_ Note: Cards status above will be recheck after 30 minutes _italic_',
+					},
+				},
+			] as SlackBlock[],
 		});
 		slackClient.chat.postMessage({
-			channel: 'C02T233MQFL',
+			channel: Deno.env.get('CHANNEL_ID') as string,
 			text: 'Quest Check',
 			blocks: [
 				{
@@ -197,6 +207,7 @@ export default async function processTriggers() {
 				{ type: 'divider' },
 				...slackMessageBlocks,
 			],
+			parse: 'full',
 		});
 		// should send slack message
 	}
