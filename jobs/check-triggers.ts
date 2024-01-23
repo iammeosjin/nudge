@@ -6,6 +6,7 @@ import { ID } from '../types.ts';
 
 export default async function checkTriggersJob(id: ID) {
 	const now = DateTime.now();
+	console.log('job checks', now.hour, now.weekday);
 	if (now.hour >= 19 || now.hour < 8) return;
 	if (now.weekday > 5) return;
 	const job = await getJob(id);
