@@ -55,10 +55,16 @@ export async function getUserIssueSummary(params: {
 						2,
 					)
 				}% ${issue.key} - ${issue.summary}>*`,
-				`>${summary.inProgress} already in progress`,
-				`>${summary.ready} ready for development`,
-				`>${summary.backlog} in backlog `,
-				`>with ${summary.defect} defects`,
+				summary.inProgress
+					? `>${summary.inProgress} already in progress`
+					: undefined,
+				summary.ready
+					? `>${summary.ready} ready for development`
+					: undefined,
+				summary.backlog ? `>${summary.backlog} in backlog` : undefined,
+				summary.defect
+					? `>with ${summary.defect} defects (overall)`
+					: undefined,
 				`>in ${dateDifference}`,
 				atCardsText,
 			].filter((text) => !!text).join('\n');
