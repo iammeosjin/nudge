@@ -3,6 +3,7 @@ import Bluebird from 'npm:bluebird';
 import { Issue, JiraStatus, Trigger, TriggerType } from '../types.ts';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
+import all from 'https://deno.land/x/ramda@v0.27.2/source/all.js';
 import getUser from './get-user.ts';
 
 type SubTaskBreakdwon = {
@@ -10,8 +11,9 @@ type SubTaskBreakdwon = {
 	devCards: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
 	cardStatuses: JiraStatus[];
 	atCardStatuses: JiraStatus[];
-	allDevCardsDone: boolean;
+	devCardStatuses: JiraStatus[];
 	allAtCardsDone: boolean;
+	allDevCardsDone: boolean;
 };
 
 /*
@@ -23,6 +25,14 @@ type SubTaskBreakdwon = {
  * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
  * T7: when there is no acceptance testing
  */
+
+function allDone(statuses: JiraStatus[]) {
+	return all(
+		(status: JiraStatus) =>
+			status === JiraStatus.DONE || status === JiraStatus.CANCELED,
+		statuses,
+	);
+}
 
 export default function getTriggers(
 	issues: Issue[],
@@ -45,13 +55,9 @@ export default function getTriggers(
 					) {
 						accum.atCards.push(curr);
 						accum.atCardStatuses.push(curr.status);
-						accum.allAtCardsDone = accum.allAtCardsDone &&
-							curr.status === JiraStatus.DONE;
 					} else {
 						accum.devCards.push(curr);
-						accum.allDevCardsDone = accum.allDevCardsDone &&
-							(curr.status === JiraStatus.DONE ||
-								curr.status === JiraStatus.CANCELED);
+						accum.devCardStatuses.push(curr.status);
 					}
 
 					accum.cardStatuses.push(curr.status);
@@ -67,6 +73,7 @@ export default function getTriggers(
 					devCards: [],
 					cardStatuses: [],
 					atCardStatuses: [],
+					devCardStatuses: [],
 					allDevCardsDone: true,
 					allAtCardsDone: true,
 				} as SubTaskBreakdwon,
@@ -77,13 +84,14 @@ export default function getTriggers(
 				devCards,
 				cardStatuses,
 				atCardStatuses,
+				devCardStatuses,
 			} = breakdown;
 
 			const allDevCardsDone = !isEmpty(devCards) &&
-				breakdown.allDevCardsDone;
+				allDone(devCardStatuses);
 
 			const allAtCardsDone = !isEmpty(atCards) &&
-				breakdown.allAtCardsDone;
+				allDone(atCardStatuses);
 
 			acc.issues.push({
 				...issue,
