@@ -51,7 +51,7 @@ export async function getUserIssueSummary(params: {
 
 			return [
 				`*<${link}|${
-					(100 - issue.devCards.length / (summary.done || 1)).toFixed(
+					(summary.done / issue.devCards.length).toFixed(
 						2,
 					)
 				}% ${issue.key} - ${issue.summary}>*`,

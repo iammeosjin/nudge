@@ -24,6 +24,8 @@ type SubTaskBreakdwon = {
  * T5: when there are parent card that are not in progress status but have children that are already in progress
  * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
  * T7: when there is no acceptance testing (disabled)
+ * T8: when there is no tasks in tasks board for backend/frontend
+ * T9: when there is no currently task assigned to BE devs
  * T10: when parent is in progress and all other subtasks are done but there are  backlogs
  */
 

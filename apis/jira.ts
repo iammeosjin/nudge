@@ -5,6 +5,7 @@ import {
 	JiraChangeLogResponse,
 	JiraIssueFieldsResponse,
 	JiraIssueFilter,
+	JiraIssueJobType,
 	JiraIssueType,
 	JiraRequestOptions,
 	JiraStatus,
@@ -25,6 +26,11 @@ const issueTypes = {
 	'10315': 'DEFECT',
 	'10355': 'BASIC_TASK',
 } as Record<string, JiraIssueType>;
+
+const jobTypes = {
+	'Frontend': JiraIssueJobType.FRONTEND,
+	'Backend': JiraIssueJobType.BACKEND,
+} as Record<string, JiraIssueJobType>;
 
 export class JiraAPI {
 	static async getIssues(
@@ -76,6 +82,7 @@ export class JiraAPI {
 					'updated',
 					'status',
 					'subtasks',
+					'customfield_10813',
 				],
 			},
 		) as JiraRequestOptions & {
@@ -121,6 +128,9 @@ export class JiraAPI {
 					subTasks,
 					statusCategoryChangeDate: issue.fields
 						?.statuscategorychangedate,
+					jobType: issue.fields.customfield_10813?.value
+						? jobTypes[issue.fields.customfield_10813.value]
+						: undefined,
 				};
 			});
 
