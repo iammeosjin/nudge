@@ -145,7 +145,7 @@ export default function getTriggers(
 				});
 			} else if (
 				allDevCardsDone &&
-				breakdown.allAtCardsDone &&
+				(isEmpty(atCardStatuses) || allDone(atCardStatuses)) &&
 				issue.status === JiraStatus.IN_PROGRESS
 			) {
 				acc.triggers.push({
