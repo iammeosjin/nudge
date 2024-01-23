@@ -54,6 +54,14 @@ export enum JiraIssueType {
 	BASIC_TASK = 'BASIC_TASK',
 }
 
+export type JiraIssueFilter = Partial<
+	{
+		statuses: JiraStatus[];
+		assignees: string[];
+		types: string;
+	}
+>;
+
 export enum JiraStatus {
 	BACKLOG = 'Backlog',
 	READY = 'Ready',
@@ -74,6 +82,7 @@ export interface Issue {
 	reporter: string;
 	status: JiraStatus;
 	type: JiraIssueType;
+	statusCategoryChangeDate: string;
 	parent?: Pick<Issue, 'key' | 'type' | 'status'>;
 	subTasks: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
 }

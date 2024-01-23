@@ -7,6 +7,9 @@ import TriggerModel from './models/trigger.ts';
 import { getLastTrigger } from './libs/process-triggers.ts';
 import checkTriggersJob from './jobs/check-triggers.ts';
 import { addJob } from './controllers/job.ts';
+import getUser from './libs/get-user.ts';
+import jiraIssuesLoader from './libs/dataloaders/jira-issues-loader.ts';
+import { getUserIssueSummary } from './libs/get-user-issue-summary.ts';
 
 const users = await Deno.readTextFile('./db/users.json').then((content) =>
 	JSON.parse(content)
@@ -52,8 +55,37 @@ Deno.serve(async (req) => {
 	}
 
 	if (req.method === 'POST' && url.pathname === '/callback/slack') {
-		console.log(await req.formData());
-		return new Response(undefined, { status: 200 });
+		const body = await req.formData();
+		if (
+			!body.get('token') ||
+			body.get('token') !== Deno.env.get('SLACK_COMMAND_TOKEN')
+		) {
+			return new Response(undefined, { status: 401 });
+		}
+		if (!body.get('response_url')) {
+			return new Response(undefined, {
+				status: 200,
+			});
+		}
+		const user = getUser({ slack: body.get('user_id') as string });
+
+		if (!user?.jira) return new Response(undefined, { status: 200 });
+		(async () => {
+			const issues = await jiraIssuesLoader.load(user?.jira as string);
+			await getUserIssueSummary({
+				issues,
+				url: body.get('response_url') as string,
+			});
+		})();
+		return new Response(
+			JSON.stringify({
+				'response_type': 'in_channel',
+				'text': 'checking...',
+			}),
+			{
+				status: 200,
+			},
+		);
 	}
 
 	if (url.searchParams.get('token') !== '123') {
