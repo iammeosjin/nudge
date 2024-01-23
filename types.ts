@@ -128,6 +128,8 @@ export enum TriggerType {
 	T5 = 'task is not in progress status but have subtask that are already in progress',
 	T6 = 'there are acceptance testing that are in ready or in progress but other subtask are not done yet',
 	T7 = 'there is no acceptance testing',
+	T10 =
+		'parent is in progress and all other subtasks are done but there are backlogs',
 }
 
 export type Trigger = {

@@ -112,6 +112,11 @@ export default async function generateSlackBlocks(
 			if (type === TriggerType.T7) {
 				title = 'Can we check if these cards needs acceptance testing?';
 			}
+
+			if (type === TriggerType.T10) {
+				title =
+					'Let\'s keep this moving. See if there are backlogs that can be move to ready';
+			}
 			const text = [
 				`*${title}*`,
 				'>```' +

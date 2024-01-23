@@ -24,6 +24,7 @@ type SubTaskBreakdwon = {
  * T5: when there are parent card that are not in progress status but have children that are already in progress
  * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
  * T7: when there is no acceptance testing (disabled)
+ * T10: when parent is in progress and all other subtasks are done but there are  backlogs
  */
 
 function allDone(statuses: JiraStatus[]) {
@@ -164,6 +165,24 @@ export default function getTriggers(
 					type: TriggerType.T6,
 					body: trigger,
 				});
+			} else if (
+				issue.status === JiraStatus.IN_PROGRESS && !isEmpty(devCards) &&
+				!allDevCardsDone
+			) {
+				const undoneSubtasks = devCardStatuses.filter((status) =>
+					status !== JiraStatus.DONE && status !== JiraStatus.CANCELED
+				);
+
+				if (
+					undoneSubtasks.includes(JiraStatus.BACKLOG) &&
+					!undoneSubtasks.includes(JiraStatus.IN_PROGRESS)
+				) {
+					acc.triggers.push({
+						id: [issue.key],
+						type: TriggerType.T10,
+						body: trigger,
+					});
+				}
 			}
 
 			return acc;
