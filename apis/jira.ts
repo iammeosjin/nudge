@@ -4,6 +4,7 @@ import {
 	Issue,
 	JiraChangeLogResponse,
 	JiraIssueFieldsResponse,
+	JiraIssueFilter,
 	JiraIssueType,
 	JiraRequestOptions,
 	JiraStatus,
@@ -28,15 +29,30 @@ const issueTypes = {
 
 export class JiraAPI {
 	static async getIssues(
+		filter?: JiraIssueFilter,
 		options?: Partial<JiraRequestOptions>,
 	): Promise<
 		JiraRequestOptions & {
 			issues: Issue[];
 		}
 	> {
+		let status = `(Ready, "In Progress")`;
+		if (filter?.statuses?.length) {
+			status = `(${filter.statuses.join(', ')})`;
+		}
+
+		let types = '(Bug, Story, standardIssueTypes())';
+		if (filter?.types) {
+			types = filter.types;
+		}
+
 		const query = [
 			'project = "ROW"',
-			`status IN (Ready, "In Progress") and type in (Bug, Story, standardIssueTypes())`,
+			`status IN ${status}`,
+			`type in ${types}`,
+			filter?.assignees?.length
+				? `assignee in (${filter.assignees.join(', ')})`
+				: undefined,
 		].filter((index) => !!index).join(' AND ');
 
 		const jql =
@@ -104,6 +120,8 @@ export class JiraAPI {
 					],
 					parent,
 					subTasks,
+					statusCategoryChangeDate: issue.fields
+						?.statuscategorychangedate,
 				};
 			});
 

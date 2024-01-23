@@ -7,6 +7,10 @@ import TriggerModel from './models/trigger.ts';
 import { getLastTrigger } from './libs/process-triggers.ts';
 import checkTriggersJob from './jobs/check-triggers.ts';
 import { addJob } from './controllers/job.ts';
+import getUser from './libs/get-user.ts';
+import jiraIssuesLoader from './libs/dataloaders/jira-issues-loader.ts';
+import { getUserIssueSummary } from './libs/get-user-issue-summary.ts';
+import { deleteTrigger } from './controllers/trigger.ts';
 
 const users = await Deno.readTextFile('./db/users.json').then((content) =>
 	JSON.parse(content)
@@ -33,7 +37,7 @@ Deno.cron('check-triggers', '*/2 * * * *', async () => {
 	// );
 });
 
-Deno.cron('delete triggers', '0 1 * * *', async () => {
+Deno.cron('delete triggers', '0 16 * * *', async () => {
 	await Bluebird.map(
 		await TriggerModel.list(),
 		(t) => TriggerModel.delete(t.id),
@@ -52,8 +56,31 @@ Deno.serve(async (req) => {
 	}
 
 	if (req.method === 'POST' && url.pathname === '/callback/slack') {
-		console.log(await req.formData());
-		return new Response(undefined, { status: 200 });
+		const body = await req.formData();
+		if (
+			!body.get('token') ||
+			body.get('token') !== Deno.env.get('SLACK_COMMAND_TOKEN')
+		) {
+			return new Response(undefined, { status: 401 });
+		}
+		if (!body.get('response_url')) {
+			return new Response(undefined, {
+				status: 200,
+			});
+		}
+		const user = getUser({ slack: body.get('user_id') as string });
+
+		if (!user?.jira) return new Response(undefined, { status: 200 });
+		(async () => {
+			const issues = await jiraIssuesLoader.load(user?.jira as string);
+			await getUserIssueSummary({
+				issues,
+				url: body.get('response_url') as string,
+			});
+		})();
+		return new Response(undefined, {
+			status: 200,
+		});
 	}
 
 	if (url.searchParams.get('token') !== '123') {
@@ -66,6 +93,7 @@ Deno.serve(async (req) => {
 
 	if (req.method === 'POST' && url.pathname === '/api/jobs') {
 		const body = await req.json();
+		console.log('update-jobs', body);
 		await addJob(body);
 		return new Response('OK');
 	}
@@ -80,7 +108,7 @@ Deno.serve(async (req) => {
 	if (req.method === 'DELETE' && url.pathname === '/api/triggers') {
 		await Bluebird.map(
 			await TriggerModel.list(),
-			(t) => TriggerModel.delete(t.id),
+			(t) => deleteTrigger(t.id),
 		);
 		return new Response('OK');
 	}
