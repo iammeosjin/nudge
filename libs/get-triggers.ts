@@ -14,6 +14,16 @@ type SubTaskBreakdwon = {
 	allAtCardsDone: boolean;
 };
 
+/*
+ * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
+ * T2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
+ * T3: when pull request is in stale for more than 5 minutes
+ * T4: when there are pending pull request or subtasks on the closing hours
+ * T5: when there are parent card that are not in progress status but have children that are already in progress
+ * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
+ * T7: when there is no acceptance testing
+ */
+
 export default function getTriggers(
 	issues: Issue[],
 	triggers?: Trigger[],
@@ -127,7 +137,7 @@ export default function getTriggers(
 				});
 			} else if (
 				allDevCardsDone &&
-				allAtCardsDone &&
+				breakdown.allAtCardsDone &&
 				issue.status === JiraStatus.IN_PROGRESS
 			) {
 				acc.triggers.push({
