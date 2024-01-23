@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
 
 	if (req.method === 'POST' && url.pathname === '/api/jobs') {
 		const body = await req.json();
+		console.log('update-jobs', body);
 		await addJob(body);
 		return new Response('OK');
 	}
