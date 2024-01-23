@@ -117,7 +117,7 @@ export class JiraAPI {
 		options?: Partial<JiraRequestOptions>,
 	): Promise<
 		JiraRequestOptions & {
-			issues: Issue[];
+			issues: Task[];
 		}
 	> {
 		const query = [

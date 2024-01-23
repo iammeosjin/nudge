@@ -8,6 +8,7 @@ import toPairs from 'https://deno.land/x/ramda@v0.27.2/source/toPairs.js';
 import groupBy from 'https://deno.land/x/ramda@v0.27.2/source/groupBy.js';
 import concat from 'https://deno.land/x/ramda@v0.27.2/source/concat.js';
 import consumeJiraIssues from './consume-jira-issues.ts';
+import consumeJiraTasks from './consume-jira-tasks.ts';
 import consumeGithubPullRequests from './consume-github-pull-requests.ts';
 import { SlackBlock, Team, Trigger, TriggerType } from '../types.ts';
 import { GITHUB_REPOSITORIES } from './constants.ts';
@@ -27,6 +28,7 @@ export default async function processTriggers() {
 	// get all triggers and merge them
 	const triggers: Trigger[] = concat(
 		await consumeJiraIssues({ triggers: [] }).then((res) => res.triggers),
+		await consumeJiraTasks({ triggers: [] }).then((res) => res.triggers),
 		await consumeGithubPullRequests({ triggers: [] }, {
 			...GITHUB_REPOSITORIES[Team.NEXIUX],
 		}).then((res) => res.triggers),
@@ -121,9 +123,14 @@ export default async function processTriggers() {
 			if (type === TriggerType.T6) {
 				title = 'Are we sure these tasks are ready for testing?';
 			}
-
 			if (type === TriggerType.T7) {
 				title = 'Can we check if these cards needs acceptance testing?';
+			}
+			if (type === TriggerType.T8) {
+				title = 'Task board is empty, kindly add new task cards';
+			}
+			if (type === TriggerType.T9) {
+				title = 'The following devs has no assigned task';
 			}
 
 			const blocks = [
