@@ -1,6 +1,5 @@
 import { JiraAPI } from '../apis/jira.ts';
 import {
-	ID,
 	JiraRequestOptions,
 	JiraStatus,
 	Trigger,
@@ -40,13 +39,12 @@ export default async function consumeJiraTasks(
 
 		if (isEmpty(filteredTasks)) {
 			result.triggers.push({
-				id: uuid.V4.uuid() as unknown as ID,
+				id: [uuid.V4.uuid()],
 				type: assignee ? TriggerType.T9 : TriggerType.T8,
 				body: {
 					link:
 						`https://identifi.atlassian.net/jira/software/c/projects/ROW/boards/158`,
 					key: '',
-					recipient: getUser({ jira: '5c7759ef36ce822fe7285181' }),
 					jobType,
 					...assignee
 						? { assignee: getUser({ jira: assignee }) }

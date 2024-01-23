@@ -80,14 +80,24 @@ export default async function generateSlackBlocks(
 						].filter((r) => !!r).join(' '),
 					);
 				}
+				if (curr.body.assignee?.slack) {
+					accum.assignees.push(
+						[
+							`<@${curr.body.assignee.slack.trim()}>`,
+							curr.body.assignee.emoji || undefined,
+						].filter((r) => !!r).join(' '),
+					);
+				}
 
 				return accum;
 			}, {
 				links: [],
 				recipients: [],
+				assignees: [],
 			} as {
 				links: { href: string; assignee?: string }[];
 				recipients: string[];
+				assignees: string[];
 			});
 
 			let title: string | undefined;
@@ -108,18 +118,26 @@ export default async function generateSlackBlocks(
 			if (type === TriggerType.T6) {
 				title = 'Are we sure these tasks are ready for testing?';
 			}
-
 			if (type === TriggerType.T7) {
 				title = 'Can we check if these cards needs acceptance testing?';
 			}
+			if (type === TriggerType.T8) {
+				title = 'Task board is empty, kindly add new task cards';
+			}
+			if (type === TriggerType.T9) {
+				title = 'The following devs has no assigned task';
+			}
+
 			const text = [
 				`*${title}*`,
-				'>```' +
-				(contents.links.map((index) =>
-					`${index.href}${
-						index.assignee ? ` - ${index.assignee}` : ''
-					}`
-				)).join('\n') + '```',
+				!isEmpty(contents.assignees)
+					? contents.assignees.join('\n')
+					: '>```' +
+						(contents.links.map((index) =>
+							`${index.href}${
+								index.assignee ? ` - ${index.assignee}` : ''
+							}`
+						)).join('\n') + '```',
 			];
 
 			if (!isEmpty(contents.recipients)) {
