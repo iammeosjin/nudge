@@ -47,8 +47,8 @@ export class JiraAPI {
 
 		const query = [
 			'project = "ROW"',
-			`status IN ${status},
-			type in ${types}`,
+			`status IN ${status}`,
+			`type in ${types}`,
 			filter?.assignees?.length
 				? `assignee in (${filter.assignees.join(', ')})`
 				: undefined,
