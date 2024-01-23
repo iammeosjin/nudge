@@ -3,9 +3,10 @@ import { DateTime } from 'npm:luxon';
 import { addJob, getJob } from '../controllers/job.ts';
 import processTriggers from '../libs/process-triggers.ts';
 import { ID } from '../types.ts';
+import { TIMEZONE } from '../libs/constants.ts';
 
 export default async function checkTriggersJob(id: ID) {
-	const now = DateTime.now();
+	const now = DateTime.now().setZone(TIMEZONE);
 	console.log('job checks', now.hour, now.weekday);
 	if (now.hour >= 19 || now.hour < 8) return;
 	if (now.weekday > 5) return;
