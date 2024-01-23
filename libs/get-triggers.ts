@@ -66,6 +66,7 @@ export default function getTriggers(
 						...accum,
 						cardStatuses: uniq(accum.cardStatuses),
 						atCardStatuses: uniq(accum.atCardStatuses),
+						devCardStatuses: uniq(accum.devCardStatuses),
 					};
 				},
 				{
