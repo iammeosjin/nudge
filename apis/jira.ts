@@ -122,7 +122,7 @@ export class JiraAPI {
 	> {
 		const query = [
 			'project = "ROW"',
-			`status IN (Ready, "In Progress") and type in subTaskIssueTypes() and "Job Type[Dropdown]" IN (Backend, Frontend)`,
+			`status IN (Ready, "In Progress") and type in (Subtask, subTaskIssueTypes()) and "Job Type[Dropdown]" IN (Backend, Frontend)`,
 		].filter((index) => !!index).join(' AND ');
 
 		const jql =

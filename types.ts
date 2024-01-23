@@ -130,7 +130,7 @@ export enum TriggerType {
 	T5 = 'task is not in progress status but have subtask that are already in progress',
 	T6 = 'there are acceptance testing that are in ready or in progress but other subtask are not done yet',
 	T7 = 'there is no acceptance testing',
-	T8 = 'there is tasks in the task board',
+	T8 = 'there is no tasks in the task board',
 	T9 = 'there is no task assigned to a BE dev',
 }
 
@@ -142,6 +142,7 @@ export type Trigger = {
 		key: string;
 		assignee?: User;
 		recipient?: User;
+		jobType?: 'Backend' | 'Frontend';
 	};
 	lastTriggeredAt?: string;
 };

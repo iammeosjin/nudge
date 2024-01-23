@@ -47,6 +47,7 @@ export default async function consumeJiraTasks(
 						`https://identifi.atlassian.net/jira/software/c/projects/ROW/boards/158`,
 					key: '',
 					recipient: getUser({ jira: '5c7759ef36ce822fe7285181' }),
+					jobType,
 					...assignee
 						? { assignee: getUser({ jira: assignee }) }
 						: undefined,
