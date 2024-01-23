@@ -79,11 +79,6 @@ export default async function processTriggers() {
 			},
 			{ type: 'divider' },
 		] as SlackBlock[];
-		console.log({
-			channel: Deno.env.get('CHANNEL_ID') as string,
-			text: 'Quest Check',
-			blocks: blocks,
-		});
 		if (Deno.env.get('ENVIRONMENT')) {
 			slackClient.chat.postMessage({
 				channel: Deno.env.get('CHANNEL_ID') as string,

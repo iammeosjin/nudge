@@ -78,15 +78,9 @@ Deno.serve(async (req) => {
 				url: body.get('response_url') as string,
 			});
 		})();
-		return new Response(
-			JSON.stringify({
-				'response_type': 'in_channel',
-				'text': 'checking...',
-			}),
-			{
-				status: 200,
-			},
-		);
+		return new Response(undefined, {
+			status: 200,
+		});
 	}
 
 	if (url.searchParams.get('token') !== '123') {
