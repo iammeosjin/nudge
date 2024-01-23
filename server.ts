@@ -36,7 +36,7 @@ Deno.cron('check-triggers', '*/2 * * * *', async () => {
 	// );
 });
 
-Deno.cron('delete triggers', '0 1 * * *', async () => {
+Deno.cron('delete triggers', '0 16 * * *', async () => {
 	await Bluebird.map(
 		await TriggerModel.list(),
 		(t) => TriggerModel.delete(t.id),
