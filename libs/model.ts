@@ -20,9 +20,9 @@ export default class DefaultModel<T> {
 		return true;
 	}
 
-	async insert(input: KVEntry & T) {
+	async insert(input: KVEntry & T, options: { ttl?: number } = {}) {
 		const key = [this.getPrefix(), ...input.id];
-		const res = await KV.set(key, input);
+		const res = await KV.set(key, input, { expireIn: options.ttl });
 		return res.ok;
 	}
 

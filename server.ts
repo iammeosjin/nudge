@@ -10,6 +10,7 @@ import { addJob } from './controllers/job.ts';
 import getUser from './libs/get-user.ts';
 import jiraIssuesLoader from './libs/dataloaders/jira-issues-loader.ts';
 import { getUserIssueSummary } from './libs/get-user-issue-summary.ts';
+import { deleteTrigger } from './controllers/trigger.ts';
 
 const users = await Deno.readTextFile('./db/users.json').then((content) =>
 	JSON.parse(content)
@@ -113,7 +114,7 @@ Deno.serve(async (req) => {
 	if (req.method === 'DELETE' && url.pathname === '/api/triggers') {
 		await Bluebird.map(
 			await TriggerModel.list(),
-			(t) => TriggerModel.delete(t.id),
+			(t) => deleteTrigger(t.id),
 		);
 		return new Response('OK');
 	}
