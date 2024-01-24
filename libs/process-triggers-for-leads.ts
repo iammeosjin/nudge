@@ -114,7 +114,7 @@ export default async function processTriggersForLeads() {
 			slackClient.chat.postMessage({
 				channel: Deno.env.get('LEADS_CHANNEL_ID') as string,
 				text: 'Quest Check',
-				blocks: result.blocks,
+				blocks: blocks,
 			});
 		}
 	}

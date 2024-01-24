@@ -81,7 +81,7 @@ export default async function generateSlackBlocks(
 						trigger.type === TriggerType.T8 ||
 						trigger.type === TriggerType.T9
 					) {
-						maxDiffInMinutes = 1;
+						maxDiffInMinutes = 10;
 					}
 
 					if (diffInMinutes < maxDiffInMinutes) {
