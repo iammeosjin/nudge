@@ -3,7 +3,7 @@ import '$std/dotenv/load.ts';
 import Bluebird from 'npm:bluebird';
 // @deno-types=npm:@types/luxon
 import { DateTime } from 'npm:luxon';
-import { Trigger, TriggerType, User } from '../types.ts';
+import { SlackBlock, Trigger, TriggerType, User } from '../types.ts';
 import { addTrigger, deleteTrigger } from '../controllers/trigger.ts';
 import slackClient from './slack-client.ts';
 import generateSlackBlocks from './generate-slack-block.ts';
@@ -90,6 +90,26 @@ export default async function processTriggersForLeads() {
 
 	const result = await generateSlackBlocks(triggers);
 	if (!isEmpty(result.blocks)) {
+		const blocks = [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `*Quick Check* <!here>`,
+				},
+			},
+			{ type: 'divider' },
+			...result.blocks,
+			{ type: 'divider' },
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: 'kindly verify cc: <@U01FV9A3JK0> <@UFYD1NRGE>',
+				},
+			},
+			{ type: 'divider' },
+		] as SlackBlock[];
 		if (Deno.env.get('ENVIRONMENT')) {
 			slackClient.chat.postMessage({
 				channel: Deno.env.get('LEADS_CHANNEL_ID') as string,
