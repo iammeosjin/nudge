@@ -18,7 +18,7 @@ export function getTrigger(id: ID) {
 export function addTrigger(trigger: Trigger) {
 	const key = trigger.id.join('-');
 	const promise = (async () => {
-		await TriggerModel.insert(trigger, { ttl: ms('1h') as number });
+		await TriggerModel.insert(trigger, { ttl: ms('24h') as number });
 		return trigger;
 	})();
 	cache.set(key, promise);
