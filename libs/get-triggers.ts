@@ -177,7 +177,8 @@ export default function getTriggers(
 
 				if (
 					undoneSubtasks.includes(JiraStatus.BACKLOG) &&
-					!undoneSubtasks.includes(JiraStatus.IN_PROGRESS)
+					!undoneSubtasks.includes(JiraStatus.IN_PROGRESS) &&
+					!undoneSubtasks.includes(JiraStatus.READY)
 				) {
 					acc.triggers.push({
 						id: [issue.key],

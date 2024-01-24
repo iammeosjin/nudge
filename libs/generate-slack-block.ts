@@ -11,6 +11,19 @@ import pluck from 'https://deno.land/x/ramda@v0.27.2/source/pluck.js';
 import flatten from 'https://deno.land/x/ramda@v0.27.2/source/flatten.js';
 import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
 
+/*
+ * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
+ * T2: when all subtasks are done including the acceptance testing but the parent card still in "In Progress" status
+ * T3: when pull request is in stale for more than 5 minutes
+ * T4: when there are pending pull request or subtasks on the closing hours
+ * T5: when there are parent card that are not in progress status but have children that are already in progress
+ * T6: when there are acceptance testing that are in ready or in progress but other subtask are not done yet
+ * T7: when there is no acceptance testing (disabled)
+ * T8: when there is no tasks in tasks board for backend/frontend
+ * T9: when there is no currently task assigned to BE devs
+ * T10: when parent is in progress and all other subtasks are done but there are  backlogs
+ */
+
 export default async function generateSlackBlocks(
 	triggers: Trigger[],
 ): Promise<{ blocks: SlackBlock[]; triggers: Trigger[] }> {
@@ -44,14 +57,31 @@ export default async function generateSlackBlocks(
 					maxDiffInMinutes = 60;
 				}
 				*/
-					if (trigger.type === TriggerType.T7) {
+
+					if (
+						[
+							TriggerType.T1,
+							TriggerType.T2,
+							TriggerType.T4,
+							TriggerType.T5,
+							TriggerType.T6,
+							TriggerType.T7,
+							TriggerType.T10,
+						].includes(trigger.type)
+					) {
 						maxDiffInMinutes = 60;
 						return null;
 					}
 
 					if (trigger.type === TriggerType.T3) {
-						maxDiffInMinutes = 3;
-						return null;
+						maxDiffInMinutes = 45;
+					}
+
+					if (
+						trigger.type === TriggerType.T8 ||
+						trigger.type === TriggerType.T9
+					) {
+						maxDiffInMinutes = 1;
 					}
 
 					if (diffInMinutes < maxDiffInMinutes) {
