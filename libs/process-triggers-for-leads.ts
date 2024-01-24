@@ -9,6 +9,7 @@ import slackClient from './slack-client.ts';
 import generateSlackBlocks from './generate-slack-block.ts';
 import consumeJiraSubTasks from './consume-jira-sub-tasks.ts';
 import getUser from './get-user.ts';
+import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 
 /*
  * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
@@ -47,12 +48,14 @@ export default async function processTriggersForLeads() {
 
 	if (t8Trigger) {
 		const result = await generateSlackBlocks([t8Trigger]);
-		if (Deno.env.get('ENVIRONMENT')) {
-			slackClient.chat.postMessage({
-				channel: Deno.env.get('CHANNEL_ID') as string,
-				text: 'Quest Check',
-				blocks: result.blocks,
-			});
+		if (!isEmpty(result.blocks)) {
+			if (Deno.env.get('ENVIRONMENT')) {
+				slackClient.chat.postMessage({
+					channel: Deno.env.get('CHANNEL_ID') as string,
+					text: 'Quest Check',
+					blocks: result.blocks,
+				});
+			}
 		}
 
 		await Bluebird.map(result.triggers, async (t: Trigger) => {
@@ -86,12 +89,14 @@ export default async function processTriggersForLeads() {
 	}).filter((trigger) => !!trigger) as Trigger[];
 
 	const result = await generateSlackBlocks(triggers);
-	if (Deno.env.get('ENVIRONMENT')) {
-		slackClient.chat.postMessage({
-			channel: Deno.env.get('LEADS_CHANNEL_ID') as string,
-			text: 'Quest Check',
-			blocks: result.blocks,
-		});
+	if (!isEmpty(result.blocks)) {
+		if (Deno.env.get('ENVIRONMENT')) {
+			slackClient.chat.postMessage({
+				channel: Deno.env.get('LEADS_CHANNEL_ID') as string,
+				text: 'Quest Check',
+				blocks: result.blocks,
+			});
+		}
 	}
 
 	await Bluebird.map(result.triggers, async (t: Trigger) => {
