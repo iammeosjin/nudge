@@ -68,6 +68,7 @@ export default async function generateSlackBlocks(
 
 			// generate blocks for slack
 			const contents = triggers.reduce((accum, curr) => {
+				if (!curr.body) return accum;
 				accum.links.push({
 					href: curr.body.link,
 					assignee: curr.body.recipient?.name,
@@ -127,6 +128,10 @@ export default async function generateSlackBlocks(
 			if (type === TriggerType.T9) {
 				title = 'The following devs has no assigned task';
 			}
+			if (type === TriggerType.T10) {
+				title =
+					"Let's keep this moving. See if there are backlogs that can be move to ready";
+			}
 
 			const text = [
 				`*${title}*`,
@@ -139,6 +144,17 @@ export default async function generateSlackBlocks(
 							}`
 						)).join('\n') + '```',
 			];
+
+			if (!isEmpty(contents.links)) {
+				text.push(
+					'>```' +
+						(contents.links.map((index) =>
+							`${index.href}${
+								index.assignee ? ` - ${index.assignee}` : ''
+							}`
+						)).join('\n') + '```',
+				);
+			}
 
 			if (!isEmpty(contents.recipients)) {
 				text.push(`>cc: ${uniq(contents.recipients).join(', ')}`);

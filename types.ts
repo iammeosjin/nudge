@@ -54,6 +54,11 @@ export enum JiraIssueType {
 	BASIC_TASK = 'BASIC_TASK',
 }
 
+export enum JiraIssueJobType {
+	BACKEND = 'BACKEND',
+	FRONTEND = 'FRONTEND',
+}
+
 export type JiraIssueFilter = Partial<
 	{
 		statuses: JiraStatus[];
@@ -83,6 +88,7 @@ export interface Issue {
 	status: JiraStatus;
 	type: JiraIssueType;
 	statusCategoryChangeDate: string;
+	jobType?: JiraIssueJobType;
 	parent?: Pick<Issue, 'key' | 'type' | 'status'>;
 	subTasks: Pick<Issue, 'key' | 'type' | 'status' | 'summary'>[];
 }
@@ -109,6 +115,7 @@ export type JiraIssueFieldsResponse = {
 	statuscategorychangedate: string;
 	updated: string;
 	created: string;
+	customfield_10813?: { value: string };
 };
 
 export type JiraChangeLogResponse = {
@@ -139,14 +146,16 @@ export enum TriggerType {
 	T5 = 'task is not in progress status but have subtask that are already in progress',
 	T6 = 'there are acceptance testing that are in ready or in progress but other subtask are not done yet',
 	T7 = 'there is no acceptance testing',
-	T8 = 'there is no tasks in the task board',
-	T9 = 'there is no task assigned to a BE dev',
+	T8 = 'there is no tasks in tasks board for backend/frontend',
+	T9 = 'there is no currently task assigned to BE devs',
+	T10 =
+		'parent is in progress and all other subtasks are done but there are backlogs',
 }
 
 export type Trigger = {
 	id: ID;
 	type: TriggerType;
-	body: {
+	body?: {
 		link: string;
 		key: string;
 		assignee?: User;
