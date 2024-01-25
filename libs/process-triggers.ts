@@ -82,7 +82,7 @@ export default async function processTriggers() {
 		if (Deno.env.get('ENVIRONMENT')) {
 			slackClient.chat.postMessage({
 				channel: Deno.env.get('CHANNEL_ID') as string,
-				text: 'Quest Check',
+				text: 'Hoy! Check mo to!',
 				blocks: blocks,
 			});
 		}

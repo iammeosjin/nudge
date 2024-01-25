@@ -51,9 +51,12 @@ export async function getUserIssueSummary(params: {
 
 			return [
 				`*<${link}|${
-					(summary.done / issue.devCards.length).toFixed(
-						2,
-					)
+					(((summary.done > issue.devCards.length
+						? issue.devCards.length
+						: summary.done) / (issue.devCards.length || 1)) * 100)
+						.toFixed(
+							2,
+						)
 				}% ${issue.key} - ${issue.summary}>*`,
 				summary.inProgress
 					? `>${summary.inProgress} already in progress`
@@ -114,7 +117,7 @@ export async function getUserIssueSummary(params: {
 		const response = await fetch(params.url, {
 			method: 'POST',
 			body: JSON.stringify({
-				text: 'Here are your issues',
+				text: 'Hatdoooooog',
 				blocks: blocks,
 				replace_original: true,
 			}),
