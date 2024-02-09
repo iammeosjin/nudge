@@ -29,20 +29,20 @@ const users = await Deno.readTextFile('./db/users.json').then((content) =>
 // 	}
 // }
 
-Deno.cron('check-triggers', '*/2 * * * *', async () => {
-	await checkTriggersJob(['check-triggers']);
-	// await Bluebird.map(
-	// 	await TriggerModel.list(),
-	// 	(t) => TriggerModel.delete(t.id),
-	// );
-});
+// Deno.cron('check-triggers', '*/2 * * * *', async () => {
+// 	await checkTriggersJob(['check-triggers']);
+// 	// await Bluebird.map(
+// 	// 	await TriggerModel.list(),
+// 	// 	(t) => TriggerModel.delete(t.id),
+// 	// );
+// });
 
-Deno.cron('delete triggers', '0 16 * * *', async () => {
-	await Bluebird.map(
-		await TriggerModel.list(),
-		(t) => TriggerModel.delete(t.id),
-	);
-});
+// Deno.cron('delete triggers', '0 16 * * *', async () => {
+// 	await Bluebird.map(
+// 		await TriggerModel.list(),
+// 		(t) => TriggerModel.delete(t.id),
+// 	);
+// });
 
 Deno.serve(async (req) => {
 	const url = new URL(req.url);
