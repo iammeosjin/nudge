@@ -87,6 +87,7 @@ export async function getUserIssueSummary(params: {
 		].join('\n');
 	}).filter((index) => !!index).join('\n');
 	const result = await generateSlackBlocks(triggers);
+	console.log('result', JSON.stringify(result));
 	const blocks = [
 		{
 			type: 'section',

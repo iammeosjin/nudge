@@ -55,6 +55,38 @@ Deno.serve(async (req) => {
 		return new Response('JIRA Response');
 	}
 
+	if (
+		req.method === 'POST' && url.pathname === '/callback/slack/interactive'
+	) {
+		const body = await req.formData();
+		console.log('slack', body, Deno.env.get('SLACK_COMMAND_TOKEN'));
+		// if (
+		// 	!body.get('token') ||
+		// 	body.get('token') !== Deno.env.get('SLACK_COMMAND_TOKEN')
+		// ) {
+		// 	return new Response(undefined, { status: 401 });
+		// }
+		// if (!body.get('response_url')) {
+		// 	return new Response(undefined, {
+		// 		status: 200,
+		// 	});
+		// }
+		// const user = getUser({ slack: body.get('user_id') as string });
+
+		// if (!user?.jira) return new Response(undefined, { status: 200 });
+		// (async () => {
+		// 	const issues = await jiraIssuesLoader.load(user?.jira as string);
+		// 	console.log('issues', issues);
+		// 	await getUserIssueSummary({
+		// 		issues,
+		// 		url: body.get('response_url') as string,
+		// 	});
+		// })();
+		return new Response(undefined, {
+			status: 200,
+		});
+	}
+
 	if (req.method === 'POST' && url.pathname === '/callback/slack') {
 		const body = await req.formData();
 		console.log('slack', body);
@@ -74,6 +106,7 @@ Deno.serve(async (req) => {
 		if (!user?.jira) return new Response(undefined, { status: 200 });
 		(async () => {
 			const issues = await jiraIssuesLoader.load(user?.jira as string);
+			console.log('issues', issues);
 			await getUserIssueSummary({
 				issues,
 				url: body.get('response_url') as string,
