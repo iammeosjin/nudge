@@ -83,8 +83,14 @@ export enum JiraStatus {
 export interface Issue {
 	key: string;
 	summary: string;
-	assignee: string;
-	reporter: string;
+	assignee: {
+		displayName: string;
+		id: string;
+	};
+	reporter: {
+		displayName: string;
+		id: string;
+	};
 	status: JiraStatus;
 	type: JiraIssueType;
 	statusCategoryChangeDate: string;
@@ -141,13 +147,20 @@ export enum TriggerType {
 		'parent is in progress and all other subtasks are done but there are backlogs',
 }
 
+export type TriggerUser = {
+	slack?: string;
+	name: string;
+};
+
 export type Trigger = {
 	id: ID;
 	type: TriggerType;
 	body?: {
-		link: string;
+		href: string;
+		title: string;
+		status?: JiraStatus;
 		key: string;
-		recipient?: User;
+		recipient?: TriggerUser;
 	};
 	lastTriggeredAt?: string;
 };

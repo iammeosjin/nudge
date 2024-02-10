@@ -39,7 +39,9 @@ export default async function processTriggers() {
 		}).then((res) => res.triggers),
 	);
 
-	const result = await generateSlackBlocks(triggers);
+	const result = await generateSlackBlocks(
+		triggers,
+	);
 
 	/*
 	 * group triggers by type
@@ -93,7 +95,6 @@ export default async function processTriggers() {
 		lastTriggerAt: DateTime.now().toISO() as string,
 		triggers: result.blocks,
 	};
-	console.log('lastTrigger', lastTrigger);
 	// update lastTriggeredAt for each trigger
 	await Bluebird.map(result.triggers, async (t: Trigger) => {
 		await addTrigger({

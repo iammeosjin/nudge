@@ -81,7 +81,8 @@ export default async function processTriggersForLeads() {
 				id: [user.jira as string],
 				type: TriggerType.T9,
 				body: {
-					link: user.name,
+					href: user.name,
+					title: user.name,
 				},
 			};
 		}

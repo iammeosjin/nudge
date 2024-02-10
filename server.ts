@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
 
 	if (req.method === 'POST' && url.pathname === '/callback/slack') {
 		const body = await req.formData();
+		console.log('slack', body);
 		if (
 			!body.get('token') ||
 			body.get('token') !== Deno.env.get('SLACK_COMMAND_TOKEN')

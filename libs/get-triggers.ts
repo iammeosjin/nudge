@@ -104,10 +104,13 @@ export default function getTriggers(
 				allDevCardsDone,
 			});
 
-			const trigger = {
-				link: `https://identifi.atlassian.net/browse/${issue.key}`,
+			const user = getUser({ jira: issue.assignee?.id });
+			const trigger: Trigger['body'] = {
+				href: `https://identifi.atlassian.net/browse/${issue.key}`,
+				title: `${issue.key} - ${issue.summary}`,
 				key: issue.key,
-				recipient: getUser({ jira: issue.assignee }),
+				status: issue.status,
+				recipient: user || { name: issue.assignee.displayName },
 			};
 
 			if (

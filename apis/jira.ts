@@ -118,8 +118,14 @@ export class JiraAPI {
 				return {
 					key: issue.key,
 					summary: issue.fields.summary,
-					assignee: issue.fields?.assignee?.accountId,
-					reporter: issue.fields?.reporter?.accountId,
+					assignee: {
+						id: issue.fields?.assignee?.accountId,
+						displayName: issue.fields?.assignee?.displayName,
+					},
+					reporter: {
+						id: issue.fields?.reporter?.accountId,
+						displayName: issue.fields?.reporter?.displayName,
+					},
 					status: issue.fields?.status?.name as JiraStatus,
 					type: issueTypes[
 						issue.fields?.issuetype?.id

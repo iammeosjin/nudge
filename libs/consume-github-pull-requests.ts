@@ -33,10 +33,12 @@ export default async function consumeGithubPullRequests(
 		response.pullRequests,
 		(acc: Trigger[], pr: PullRequest) => {
 			if (pr.merged) return acc;
+			const user = getUser({ github: pr.author });
 			const trigger = {
-				link: pr.permalink,
+				href: pr.permalink,
+				title: pr.headRefName,
 				key: pr.headRefName,
-				recipient: getUser({ github: pr.author }),
+				recipient: user || { name: pr.author },
 			};
 			const now = DateTime.now().setZone(TIMEZONE);
 			if (

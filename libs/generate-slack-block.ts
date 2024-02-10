@@ -4,12 +4,11 @@ import Bluebird from 'npm:bluebird';
 import { DateTime } from 'npm:luxon';
 import toPairs from 'https://deno.land/x/ramda@v0.27.2/source/toPairs.js';
 import groupBy from 'https://deno.land/x/ramda@v0.27.2/source/groupBy.js';
-import { SlackBlock, Trigger, TriggerType } from '../types.ts';
+import { SlackBlock, Trigger, TriggerType, User } from '../types.ts';
 import { addTrigger, getTrigger } from '../controllers/trigger.ts';
 import isEmpty from 'https://deno.land/x/ramda@v0.27.2/source/isEmpty.js';
 import pluck from 'https://deno.land/x/ramda@v0.27.2/source/pluck.js';
 import flatten from 'https://deno.land/x/ramda@v0.27.2/source/flatten.js';
-import uniq from 'https://deno.land/x/ramda@v0.27.2/source/uniq.js';
 
 /*
  * T1: when all subtasks are done but the acceptance testing card still in "backlog" status
@@ -95,31 +94,6 @@ export default async function generateSlackBlocks(
 
 			if (isEmpty(triggers)) return { blocks: [], triggers: [] };
 
-			// generate blocks for slack
-			const contents = triggers.reduce((accum, curr) => {
-				if (!curr.body) return accum;
-				accum.links.push({
-					href: curr.body.link,
-					assignee: curr.body.recipient?.name,
-				});
-				if (curr.body.recipient?.slack) {
-					accum.recipients.push(
-						[
-							curr.body.recipient.emoji || undefined,
-							`<@${curr.body.recipient.slack.trim()}>`,
-						].filter((r) => !!r).join(' '),
-					);
-				}
-
-				return accum;
-			}, {
-				links: [],
-				recipients: [],
-			} as {
-				links: { href: string; assignee?: string }[];
-				recipients: string[];
-			});
-
 			let title: string | undefined;
 			if (type === TriggerType.T1) {
 				title = 'Tasks are ready to be tested by our QAs';
@@ -155,34 +129,54 @@ export default async function generateSlackBlocks(
 				title =
 					'Let\'s keep this moving. See if there are backlogs that can be move to ready';
 			}
-			const text = [
-				`*${title}*`,
-			];
 
-			if (!isEmpty(contents.links)) {
-				text.push(
-					'>```' +
-						(contents.links.map((index) =>
-							`${index.href}${
-								index.assignee ? ` - ${index.assignee}` : ''
-							}`
-						)).join('\n') + '```',
-				);
-			}
+			const sections = triggers.map((trigger) => {
+				let recipient = trigger.body?.recipient?.name;
 
-			if (!isEmpty(contents.recipients)) {
-				text.push(`>cc: ${uniq(contents.recipients).join(', ')}`);
-			}
+				if (trigger.body?.recipient?.slack) {
+					recipient = [
+						(trigger.body.recipient as User)?.emoji || undefined,
+						`<@${trigger.body.recipient.slack.trim()}>`,
+					].filter((r) => !!r).join(' ');
+				}
+
+				return {
+					'type': 'section',
+					'text': {
+						'type': 'mrkdwn',
+						'text':
+							`>*<${trigger.body?.href}|${trigger.body?.title}>*\n>Assignee: ${
+								recipient || 'None'
+							}\t${
+								trigger.body?.status
+									? `Status: ${trigger.body?.status}`
+									: ''
+							}`,
+					},
+					'accessory': {
+						'type': 'button',
+						'text': {
+							'type': 'plain_text',
+							'text': 'Snooze',
+							'emoji': true,
+						},
+						'value': trigger.id.join(','),
+						'action_id': 'snooze-trigger',
+					},
+				};
+			});
 
 			return {
 				blocks: [
 					{
-						type: 'section',
-						text: {
-							type: 'mrkdwn',
-							text: text.join('\n'),
+						'type': 'header',
+						'text': {
+							'type': 'plain_text',
+							'text': title,
+							'emoji': true,
 						},
 					},
+					...sections,
 				] as SlackBlock[],
 				triggers,
 			};
