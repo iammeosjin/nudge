@@ -149,7 +149,7 @@ export default async function generateSlackBlocks(
 								recipient || 'None'
 							}\t${
 								trigger.body?.status
-									? `Status: ${trigger.body?.status}`
+									? `Status: *${trigger.body?.status}*`
 									: ''
 							}`,
 					},

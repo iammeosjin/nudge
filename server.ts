@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
 		console.log(
 			'slack',
-			JSON.stringify(body.entries()),
+			JSON.stringify(Array.from(body)),
 			Deno.env.get('SLACK_COMMAND_TOKEN'),
 		);
 		// if (
