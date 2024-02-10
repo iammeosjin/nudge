@@ -35,7 +35,7 @@ const loader = async (
 		filter: { keys: keys as string[] },
 	});
 	return keys.map((key) => {
-		return issues.filter((issue) => issue.assignee === key);
+		return issues.filter((issue) => issue.assignee.id === key);
 	});
 };
 

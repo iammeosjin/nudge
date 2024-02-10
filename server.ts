@@ -1,7 +1,7 @@
 import '$std/dotenv/load.ts';
 // @deno-types=npm:@types/bluebird
 import Bluebird from 'npm:bluebird';
-
+import omit from 'https://deno.land/x/ramda@v0.27.2/source/omit.js';
 import JobModel from './models/job.ts';
 import TriggerModel from './models/trigger.ts';
 import { getLastTrigger } from './libs/process-triggers.ts';
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
 		console.log(
 			'slack',
-			JSON.stringify(Array.from(body)),
+			JSON.stringify(omit(['message'])(body.get('payload'))),
 			Deno.env.get('SLACK_COMMAND_TOKEN'),
 		);
 		// if (
