@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
 							},
 						],
 					},
-				]);
+				], { replaceOriginal: false });
 			}
 
 			return new Response(undefined, {
