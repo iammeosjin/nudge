@@ -37,6 +37,7 @@ export default async function generateSlackBlocks(
 						return addTrigger(t);
 					}
 
+					if (trigger.snoozed) return trigger;
 					if (!trigger.lastTriggeredAt) return trigger;
 
 					const diffInMinutes = Math.floor(
@@ -160,7 +161,7 @@ export default async function generateSlackBlocks(
 							'text': 'Snooze',
 							'emoji': true,
 						},
-						'value': trigger.id.join(','),
+						'value': trigger.id.join('-'),
 						'action_id': 'snooze-trigger',
 					},
 				};

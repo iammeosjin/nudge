@@ -163,6 +163,7 @@ export type Trigger = {
 		recipient?: TriggerUser;
 	};
 	lastTriggeredAt?: string;
+	snoozed?: boolean;
 };
 
 export type ID = (string | number)[];
