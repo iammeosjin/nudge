@@ -40,8 +40,8 @@ export default async function consumeJiraSubTasks(
 			}
 
 			if (curr.assignee && accum?.assignees) {
-				accum.assignees[curr.assignee] =
-					(accum?.assignees[curr.assignee] || 0) + 1;
+				accum.assignees[curr.assignee.id] =
+					(accum?.assignees[curr.assignee.id] || 0) + 1;
 			}
 
 			return accum;

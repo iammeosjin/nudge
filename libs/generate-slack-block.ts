@@ -37,7 +37,7 @@ export default async function generateSlackBlocks(
 						return addTrigger(t);
 					}
 
-					if (trigger.snoozed) return trigger;
+					if (trigger.snoozed) return null;
 					if (!trigger.lastTriggeredAt) return trigger;
 
 					const diffInMinutes = Math.floor(
