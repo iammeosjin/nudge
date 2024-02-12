@@ -94,11 +94,11 @@ Deno.serve(async (req) => {
 								{
 									'type': 'mrkdwn',
 									'text':
-										`:warning:  Invalid permission for *${action.value}*`,
+										`:warning:  Invalid permission for *${action.value}* cc <@${payload.user.id}>`,
 								},
 							],
 						},
-					]);
+					], { replaceOriginal: false });
 				}
 				return new Response(undefined, {
 					status: 200,
